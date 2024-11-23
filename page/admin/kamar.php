@@ -1,38 +1,38 @@
 <?php
 session_start();
-
+ 
 // Cek apakah pengguna sudah login
 if (!isset($_SESSION['username'])) {
    header('Location: index.php'); // Jika belum login, arahkan ke halaman login
    exit();
 }
-
+ 
 // Cek role pengguna, jika bukan admin, alihkan ke halaman lain
 if ($_SESSION['role'] !== 'admin') {
    header('Location: dashboard-user.php'); // Jika bukan admin, arahkan ke dashboard user atau halaman lain
    exit();
 }
-
+ 
 $host = 'localhost';
 $dbname = 'kos_management';
 $username = 'root';
 $password = '';
-
+ 
 try {
    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
    $session_username = $_SESSION['username'];
    $stmt = $pdo->prepare("SELECT name FROM users WHERE username = :username");
    $stmt->execute(['username' => $session_username]);
-
+ 
    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
    $admin_name = $admin['name'] ?? 'Admin';
-
+ 
       // Default pagination parameters
    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; // Default 10
    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Default halaman 1
    $offset = ($page - 1) * $limit;
-
+ 
    // Total data untuk menghitung jumlah halaman dengan filter
    $total_sql = "SELECT COUNT(*) FROM rooms WHERE name LIKE :name AND type LIKE :type";
    $total_stmt = $pdo->prepare($total_sql);
@@ -41,11 +41,11 @@ try {
    $total_stmt->execute();
    $total_data = $total_stmt->fetchColumn();
    $total_pages = ceil($total_data / $limit);
-
+ 
    // Ambil parameter filter dari query string
    $name = isset($_GET['name']) ? $_GET['name'] : '';
    $type = isset($_GET['room_type']) ? $_GET['room_type'] : '';
-
+ 
    // Query untuk data kamar dengan filter dan pagination
    $sql = "SELECT * FROM rooms WHERE name LIKE :name AND type LIKE :type ORDER BY name ASC LIMIT :limit OFFSET :offset";
    $stmt_rooms = $pdo->prepare($sql);
@@ -55,42 +55,42 @@ try {
    $stmt_rooms->bindValue(':offset', $offset, PDO::PARAM_INT);
    $stmt_rooms->execute();
    $rooms = $stmt_rooms->fetchAll(PDO::FETCH_ASSOC);
-
+ 
 } catch (PDOException $e) {
    echo 'Connection failed: ' . $e->getMessage();
    exit();
 }
 ?>
-
+ 
 <?php
 try {
    // Koneksi ke database
    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+ 
    // Ambil parameter filter dari query string
    $name = isset($_GET['name']) ? $_GET['name'] : '';
    $type = isset($_GET['type']) ? $_GET['type'] : '';
-
+ 
    // Persiapkan query dengan filter dinamis
    $sql = "SELECT * FROM rooms WHERE name LIKE :name AND type LIKE :type";
    $stmt = $pdo->prepare($sql);
-
+ 
    // Bind parameter untuk filter
    $stmt->bindValue(':name', "%$name%");
    $stmt->bindValue(':type', "%$type%");
-
+ 
    // Eksekusi query
    $stmt->execute();
    $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+ 
 } catch (PDOException $e) {
    echo 'Connection failed: ' . $e->getMessage();
    exit();
 }
 ?>
-
-
+ 
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,7 +102,7 @@ try {
    <title>Dashboard</title>
 </head>
 <body class="bg-gray-100 min-h-screen">
-
+ 
 <style>
    body {
       font-family: 'Poppins', sans-serif;
@@ -117,9 +117,9 @@ try {
    #close-modal-cancel {
       z-index: 1060; /* Pastikan tombol Batal berada di atas modal */
    }
-
+ 
 </style>
-
+ 
 <!-- Sidebar -->
 <div id="sidebar" class="hidden md:block w-72 h-full bg-white text-gray-800 fixed top-0 left-0 p-5  flex-col shadow-lg z-50">
    <div class="mb-6 text-center">
@@ -143,14 +143,14 @@ try {
       </ul>
    </nav>
 </div>
-
+ 
 <!-- Mobile Sidebar Toggle -->
 <div class="md:hidden fixed top-4 left-4 z-50">
    <button id="toggle-sidebar" class="bg-blue-500 text-white p-2 rounded-md shadow">
       <i class="bx bx-menu text-xl"></i>
    </button>
 </div>
-
+ 
 <!-- Main Content -->
 <div class="md:ml-72 flex flex-col min-h-screen">
    <!-- Navbar -->
@@ -173,7 +173,7 @@ try {
          </span>
       </div>
    </nav>
-
+ 
    <!-- Content -->
    <div class="p-8">
       <div class="bg-white rounded-lg shadow-md">
@@ -188,57 +188,8 @@ try {
                   Tambah Kamar
                </button>
             </div>
-
-            <form action="kamar.php" method="GET">
-            <!-- Filter -->
-               <div class="mb-5 grid grid-cols-3 gap-3">
-                  <div class="relative w-full">
-                     <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
-                     <input type="text" id="room_name" placeholder="Cari Nama Kamar" name="name" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                  </div>
-                  <div class="relative w-full">
-                     <label for="type" class="block text-sm font-medium text-gray-700">Jenis Kamar</label>
-                     <select id="type" name="room_type" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="" disabled selected class="text-gray-300" >Pilih Jenis Kamar</option>
-                        <option value="Kamar Mandi Luar">Kamar Mandi Luar</option>
-                        <option value="Kamar Mandi Dalam">Kamar Mandi Dalam</option>
-                     </select>
-                  </div>
-                  <div class="relative w-full">
-                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                     <select id="status" name="room_type" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="" disabled selected class="text-gray-300">Pilih Status Kamar</option>
-                        <option value="Tersedia">Tersedia</option>
-                        <option value="Sedang Diperbaiki">Sedang Diperbaiki</option>
-                        <option value="Terisi">Terisi</option>
-                     </select>
-                  </div>
-               </div>
-               <!-- Filter -->
-
-               <div class="flex items-center justify-between mb-5">
-                  <!-- Pick Pagination -->
-                  <div class="mb-4 flex items-center">
-                     <label for="limit" class="mr-2 text-sm">Tampilkan:</label>
-                     <select id="limit" name="limit" class="py-1 px-2 border rounded" onchange="changeLimit()">
-                        <option value="10" <?= $limit === 10 ? 'selected' : '' ?>>10</option>
-                        <option value="20" <?= $limit === 20 ? 'selected' : '' ?>>20</option>
-                        <option value="50" <?= $limit === 50 ? 'selected' : '' ?>>50</option>
-                     </select>
-                  </div>
-                  <!-- Pick Pagination -->
-                  <!-- Tombol Find -->
-                  <button type="submit" class="flex items-center justify-center gap-2 w-32 bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2 text-white font-semibold shadow">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 4a7 7 0 011 13.938V21l5-5-5-5v3.062A5.975 5.975 0 0017 12a6 6 0 10-6 6c1.453 0 2.77-.48 3.939-1.281L12 17V7c0-1.343.672-2.602 1.745-3.485L14 3H11z" />
-                     </svg>
-                     Cari
-                  </button>
-                  <!-- Tombol Find -->
-               </div>
-            </form>
-            
-
+ 
+ 
             <!-- Table to display rooms -->
             <div class="overflow-x-auto">
                <table class="min-w-full table-auto">
@@ -291,13 +242,13 @@ try {
                                  <?php echo htmlspecialchars($room['status']); ?>
                               </td>
                            </tr>
-
+ 
                         <?php endforeach; ?>
                      <?php endif; ?>
                   </tbody>
                </table>
             </div>
-
+ 
             <!-- Pagination -->
             <div class="mt-4 flex justify-center items-center">
                <a href="?page=<?= $page - 1 ?>&limit=<?= $limit ?>" 
@@ -311,12 +262,12 @@ try {
                </a>
             </div>
             <!-- End Pagination -->
-
+ 
          </div>
       </div>
    </div>
 </div>
-
+ 
 <!-- Modal ADD-->
 <div id="room-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
    <div class="bg-white rounded-lg p-6 shadow-md w-2/3">
@@ -362,7 +313,7 @@ try {
                <input type="number" id="price" name="price" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             </div>
          </div>
-         
+ 
          <div class="mb-4">
             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
             <select id="status" name="status" class="mt-1 py-3 px-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -371,13 +322,13 @@ try {
                <option value="Sedang Diperbaiki">Sedang Diperbaiki</option>
             </select>
          </div>
-         
+ 
          <!-- Description Textarea -->
          <div class="mb-4">
             <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi Kamar</label>
             <textarea id="description" name="description" rows="4" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
          </div>
-
+ 
          <div class="flex justify-end gap-5">
             <!-- Batal Button -->
             <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
@@ -387,9 +338,9 @@ try {
       </form>
    </div>
 </div>
-
+ 
 <!-- Modal ADD-->
-
+ 
 <!-- Modal EDIT-->
 <div id="room-modal-edit" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
    <div class="bg-white rounded-lg p-6 shadow-md w-2/3">
@@ -435,7 +386,7 @@ try {
                <input type="number" id="price" name="price" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             </div>
          </div>
-         
+ 
          <div class="mb-4">
             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
             <select id="status" name="status" class="mt-1 py-3 px-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -453,23 +404,23 @@ try {
       </form>
    </div>
 </div>
-
+ 
 <!-- Modal EDIT-->
-
-
+ 
+ 
 <script>
-
+ 
    function changeLimit() {
       const limit = document.getElementById('limit').value;
       window.location.href = `?limit=${limit}&page=1`; // Reset ke halaman 1 saat jumlah data berubah
    }
-
+ 
    // Toggle Sidebar for mobile
    document.getElementById('toggle-sidebar').addEventListener('click', function() {
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('hidden');
    });
-
+ 
    // Open and Close Modal
 // Open and Close Modal
 const openModalButton = document.getElementById('open-modal');
@@ -477,20 +428,20 @@ const closeModalButton = document.getElementById('close-modal-icon');
 const closeModalCancelButton = document.getElementById('close-modal-cancel'); 
 const modal = document.getElementById('room-modal-add');
 const modalEdit = document.getElementById('room-modal-edit');
-
+ 
 openModalButton.addEventListener('click', function() {
    modal.classList.remove('hidden');
    // Menyembunyikan sidebar dan navbar ketika modal dibuka
    // document.getElementById('sidebar').classList.add('hidden');
    // document.querySelector('nav').classList.add('hidden');
 });
-
+ 
 closeModalButton.addEventListener('click', function() {
    modal.classList.add('hidden');
    document.getElementById('sidebar').classList.remove('hidden');
    document.querySelector('nav').classList.remove('hidden');
 });
-
+ 
 // Tombol Batal untuk menutup modal
 closeModalCancelButton.addEventListener('click', function() {
    modal.classList.add('hidden');
@@ -503,13 +454,13 @@ closeModalCancelButton.addEventListener('click', function() {
 document.getElementById('open-modal').addEventListener('click', function() {
    document.getElementById('room-modal').classList.remove('hidden');
 });
-
+ 
 // Open and close Edit Room Modal
 const editRoomButtons = document.querySelectorAll('.edit-room-btn');
 editRoomButtons.forEach(button => {
    button.addEventListener('click', function(e) {
       e.preventDefault();
-
+ 
       // Get data attributes from the clicked button
       const roomId = this.getAttribute('data-room-id');
       const roomName = this.getAttribute('data-name');
@@ -518,7 +469,7 @@ editRoomButtons.forEach(button => {
       const roomCapacity = this.getAttribute('data-capacity');
       const roomPrice = this.getAttribute('data-price');
       const roomStatus = this.getAttribute('data-status');
-
+ 
       // Set the values in the modal
       document.getElementById('room_name').value = roomName;
       document.getElementById('type').value = roomType;
@@ -526,22 +477,23 @@ editRoomButtons.forEach(button => {
       document.getElementById('capacity').value = roomCapacity;
       document.getElementById('price').value = roomPrice;
       document.getElementById('status').value = roomStatus;
-
+ 
       // Show the edit modal
       document.getElementById('room-modal-edit').classList.remove('hidden');
    });
 });
-
+ 
 // Close modal functions
 document.getElementById('close-modal-icon').addEventListener('click', function() {
    document.getElementById('room-modal').classList.add('hidden');
 });
-
+ 
 document.getElementById('close-modal-cancel').addEventListener('click', function() {
    document.getElementById('room-modal').classList.add('hidden');
 });
 </script>
-
-
+ 
+ 
 </body>
 </html>
+ 
