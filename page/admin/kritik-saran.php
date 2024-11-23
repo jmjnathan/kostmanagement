@@ -22,14 +22,14 @@ try {
    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
    $session_username = $_SESSION['username'];
+   
+   // Query untuk mengambil nama admin
    $stmt = $pdo->prepare("SELECT name FROM users WHERE username = :username");
    $stmt->execute(['username' => $session_username]);
-
    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
    $admin_name = $admin['name'] ?? 'Admin';
 
-
-   // Query untuk data kamar dengan filter dan pagination
+   // Query untuk mengambil data kritik dan saran
    $sql = "SELECT * FROM kritik_dan_saran";
    $stmt_rooms = $pdo->prepare($sql);
    $stmt_rooms->execute();
@@ -40,7 +40,6 @@ try {
    exit();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -58,17 +57,6 @@ try {
    body {
       font-family: 'Poppins', sans-serif;
    }
-   /* Menambahkan z-index pada modal dan tombol */
-   #room-modal {
-      z-index: 1050; /* Atur modal agar berada di atas */
-   }
-   #room-modal-edit{
-      z-index: 1050; /* Atur modal agar berada di atas */
-   }
-   #close-modal-cancel {
-      z-index: 1060; /* Pastikan tombol Batal berada di atas modal */
-   }
-
 </style>
 
 <!-- Sidebar -->
@@ -89,18 +77,12 @@ try {
          <li><a href="komplain.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-chat text-xl"></i><span>Komplain</span></a></li>
          <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
          <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
-         <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md text-blue-500 font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
+         <li><a href="kritik-saran.php" class="block px-4 py-2 text-blue-500 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
          <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:bg-red-100  items-center space-x-3"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
       </ul>
    </nav>
 </div>
 
-<!-- Mobile Sidebar Toggle -->
-<div class="md:hidden fixed top-4 left-4 z-50">
-   <button id="toggle-sidebar" class="bg-blue-500 text-white p-2 rounded-md shadow">
-      <i class="bx bx-menu text-xl"></i>
-   </button>
-</div>
 
 <!-- Main Content -->
 <div class="md:ml-72 flex flex-col min-h-screen">
@@ -140,36 +122,38 @@ try {
                      <tr class="bg-gray-100">
                         <th class="px-4 py-2 text-left">Aksi</th>
                         <th class="px-4 py-2 text-left">Nama Pengirim</th>
-                        <th class="px-4 py-2 text-left">Email Pengirim</th>
                         <th class="px-4 py-2 text-left">Tanggal Kirim</th>
                         <th class="px-4 py-2 text-left">Kritik</th>
                         <th class="px-4 py-2 text-left">Kategori</th>
                         <th class="px-4 py-2 text-center">Status</th>
                         <th class="px-4 py-2 text-left">Balasan Feedback</th>
+                        <th class="px-4 py-2 text-left">Tanggal Feedback</th>
                      </tr>
                   </thead>
                   <tbody>
                      <?php if (empty($rooms)): ?>
                         <tr>
-                           <td colspan="9" class="text-center py-3">No data available</td>
+                           <td colspan="8" class="text-center py-3">No data available</td>
                         </tr>
                      <?php else: ?>
                         <?php foreach ($rooms as $room): ?>
                            <tr>
-                              <td class="px-4 py-2">
+                              <td class="px-4 py-2 w-24">
                                  <!-- Edit button in the table -->
-                                 <a href="#" class="edit-room-btn text-blue-500 hover:text-blue-700">
+                                 <a href="#" class="edit-room-btn text-blue-500 hover:text-blue-700" data-id="<?= $room['id'] ?>" data-feedback="<?= htmlspecialchars($room['isi_feedback'] ?? '') ?>" data-status="<?= htmlspecialchars($room['status'] ?? '') ?>" onclick="openModal(this)">
                                     <i class="bx bx-edit"></i>
                                  </a>
+                                 <a href="../../function/admin/kritik-saran/delete-kritik-saran.php?id=<?= $room['id'] ?>" class="ml-4 text-red-500 hover:text-red-700" onclick="return confirm('Apakah Anda yakin ingin menghapus kritik dan saran ini?');">
+                                    <i class="bx bx-trash"></i>
+                                 </a>
                               </td>
-                              <td class="px-4 py-2 w-64 h-16"><?php echo !empty($room['nama_pengirim']) ? htmlspecialchars($room['nama_pengirim']) : '-'; ?></td>
-                              <td class="px-4 py-2 w-52"><?php echo !empty($room['email_pengirim']) ? htmlspecialchars($room['email_pengirim']) : '-'; ?></td>
-                              <td class="px-4 py-2">
+                              <td class="px-4 py-2 w-44"><?php echo htmlspecialchars($room['nama_pengirim'] ?? '-'); ?></td>
+                              <td class="px-4 py-2 w-40">
                                  <?php 
                                  if (!empty($room['tanggal_kirim'])) {
                                     $bulan = [
-                                       1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                                       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                                       1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+                                       'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
                                     ];
                                     $tanggal = date_create($room['tanggal_kirim']);
                                     $tanggal_indonesia = date_format($tanggal, "j") . " " . 
@@ -181,10 +165,36 @@ try {
                                  }
                                  ?>
                               </td>
-                              <td class="px-4 py-2 text-left"><?php echo !empty($room['judul']) ? htmlspecialchars($room['judul']) : '-'; ?></td>
-                              <td class="px-4 py-2 text-left"><?php echo !empty($room['kategori']) ? number_format($room['kategori']) : '-'; ?></td>
-                              <td class="px-4 py-2 w-60"><?php echo !empty($room['status']) ? htmlspecialchars($room['status']) : '-'; ?></td>
-                              <td class="px-4 py-2 w-60"><?php echo !empty($room['isi_feedback']) ? htmlspecialchars($room['isi_feedback']) : '-'; ?></td>
+                              <td class="px-4 py-2"><?php echo htmlspecialchars($room['judul'] ?? '-'); ?></td>
+                              <td class="px-4 py-2"><?php echo htmlspecialchars($room['kategori'] ?? '-'); ?></td>
+                              <td class="px-4 py-2 text-center 
+                                 <?php 
+                                       // Add the class based on status value
+                                       if ($room['status'] == 'Selesai') {
+                                          echo 'text-green-500 font-semibold';
+                                       } elseif ($room['status'] == 'Belum di baca') {
+                                          echo 'text-red-500 font-semibold';
+                                       } elseif ($room['status'] == 'Diproses') {
+                                          echo 'text-yellow-500 font-semibold';
+                                       }
+                                 ?>">
+                                 <?php echo htmlspecialchars($room['status']); ?>
+                              </td>                              
+                              <td class="px-4 py-2"><?php echo htmlspecialchars($room['isi_feedback'] ?? '-'); ?></td>
+                              <td class="px-4 py-2 w-40">
+                                 <?php 
+                                 if (!empty($room['tanggal_feedback'])) {
+                                    $tanggal_feedback = date_create($room['tanggal_feedback']);
+                                    $tanggal_feedback_indonesia = date_format($tanggal_feedback, "j") . " " . 
+                                                                  $bulan[(int)date_format($tanggal_feedback, "m")] . " " . 
+                                                                  date_format($tanggal_feedback, "Y");
+                                    echo $tanggal_feedback_indonesia;
+                                 } else {
+                                    echo '-';
+                                 }
+                                 ?>
+                              </td>
+
                            </tr>
                         <?php endforeach; ?>
                      <?php endif; ?>
@@ -196,80 +206,57 @@ try {
    </div>
 </div>
 
-<!-- Modal ADD-->
-<div id="room-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
-   <div class="bg-white rounded-lg p-6 shadow-md w-2/3">
-      <div class="mb-4">
-         <h2 class="text-xl font-semibold">Tambah Kamar</h2>
-         <!-- Close Modal Icon -->
-         <button id="close-modal-icon" class="text-red-500 absolute top-2 right-2">
-            <i class="bx bx-x text-3xl"></i>
-         </button>
-      </div>
-      <form action="../../function/admin/kamar/add-room.php" method="POST">
-         <!-- Form Fields -->
+
+<!-- Modal untuk Balasan -->
+<div id="feedbackModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 flex justify-center items-center">
+   <div class="bg-white rounded-lg w-1/2 p-6">
+      <h2 class="text-xl font-semibold mb-4">Balasan untuk Kritik dan Saran</h2>
+      <form action="../../function/admin/kritik-saran/edit-kritik-saran.php" method="POST">
+         <input type="hidden" name="id" id="kritik_id"> <!-- Untuk menyimpan ID kritik-saran yang akan dibalas -->
          <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
-            <input type="text" id="room_name" name="name" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-         </div>
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="type" class="block text-sm font-medium text-gray-700">Jenis Kamar</label>
-               <select id="type" name="room_type" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                  <option value="Kamar Mandi Luar">Kamar Mandi Luar</option>
-                  <option value="Kamar Mandi Dalam">Kamar Mandi Dalam</option>
-               </select>
-            </div>
-            <div class="flex-1">
-               <label for="ac" class="block text-sm font-medium text-gray-700">AC</label>
-               <select id="ac" name="ac" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                  <option value="AC">AC</option>
-                  <option value="Non-Ac">Non-Ac</option>
-               </select>
-            </div>
-         </div>
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="capacity" class="block text-sm font-medium text-gray-700">Kapasitas</label>
-               <select id="capacity" name="capacity" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                  <option value="1">1 orang</option>
-                  <option value="2">2 orang</option>
-               </select>
-            </div>
-            <div class="flex-1">
-               <label for="price" class="block text-sm font-medium text-gray-700">Harga</label>
-               <input type="number" id="price" name="price" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            </div>
-         </div>
-         
+            <label for="isi_feedback" class="block text-gray-700">Balasan:</label>
+            <textarea id="isi_feedback" name="feedback" rows="4" class="w-full p-2 border rounded-md" required></textarea>         </div>
          <div class="mb-4">
-            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-            <select id="status" name="status" class="mt-1 py-3 px-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-               <option value="Tersedia">Tersedia</option>
-               <option value="Terisi">Terisi</option>
-               <option value="Sedang Diperbaiki">Sedang Diperbaiki</option>
+            <label for="status" class="block text-gray-700">Status:</label>
+            <select id="status" name="status" class="w-full p-2 border rounded-md">
+               <option value="" disabled selected class="text-gray-300" >Pilih Status</option>
+               <option value="Belum di baca">Belum di baca</option>
+               <option value="Diproses">Diproses</option>
+               <option value="Selesai">Selesai</option>
             </select>
          </div>
-         
-         <!-- Description Textarea -->
-         <div class="mb-4">
-            <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi Kamar</label>
-            <textarea id="description" name="description" rows="4" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-         </div>
-
-         <div class="flex justify-end gap-5">
-            <!-- Batal Button -->
-            <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
-            <!-- Submit Button -->
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Tambah</button>
+         <div class="flex justify-end">
+            <button type="button" class="px-4 py-2 mr-4 bg-gray-300 text-gray-700 rounded-md" onclick="closeModal()">Batal</button>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Kirim</button>
          </div>
       </form>
    </div>
 </div>
 
-<!-- Modal ADD-->
-
-
 
 </body>
 </html>
+
+
+<script>
+   // Fungsi untuk membuka modal dan mengisi data
+   function openModal(button) {
+      var id = button.getAttribute('data-id');
+      var feedback = button.getAttribute('data-feedback');
+      var status = button.getAttribute('data-status');
+      
+      // Isi data ke dalam modal
+      document.getElementById('id').value = id;
+      document.getElementById('isi_feedback').value = feedback;
+      document.getElementById('status').value = status;
+
+      // Tampilkan modal
+      document.getElementById('feedbackModal').classList.remove('hidden');
+   }
+
+   // Fungsi untuk menutup modal
+   function closeModal() {
+      document.getElementById('feedbackModal').classList.add('hidden');
+   }
+</script>
+
