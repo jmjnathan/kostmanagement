@@ -34,27 +34,20 @@ try {
    $offset = ($page - 1) * $limit;
 
       // Ambil parameter filter dari query string
-      $name = isset($_GET['name']) ? $_GET['name'] : '';
-      $type = isset($_GET['type']) ? $_GET['type'] : '';
-      $status = isset($_GET['status']) ? $_GET['status'] : '';
-   
+      $name = isset($_GET['name']) ? $_GET['name'] : '';   
 
    // Total data untuk menghitung jumlah halaman dengan filter
-   $total_sql = "SELECT COUNT(*) FROM rooms WHERE name LIKE :name AND type LIKE :type AND status LIKE :status";
+   $total_sql = "SELECT COUNT(*) FROM rooms WHERE name LIKE :name";
    $total_stmt = $pdo->prepare($total_sql);
    $total_stmt->bindValue(':name', "%$name%");
-   $total_stmt->bindValue(':type', "%$type%");
-   $total_stmt->bindValue(':status', "%$status%");
    $total_stmt->execute();
    $total_data = $total_stmt->fetchColumn();
    $total_pages = ceil($total_data / $limit);
 
    // Query untuk data kamar dengan filter dan pagination
-   $sql = "SELECT * FROM rooms WHERE name LIKE :name AND type LIKE :type AND status LIKE :status ORDER BY name ASC LIMIT :limit OFFSET :offset";
+   $sql = "SELECT * FROM rooms WHERE name LIKE :name ORDER BY name ASC LIMIT :limit OFFSET :offset";
    $stmt_rooms = $pdo->prepare($sql);
    $stmt_rooms->bindValue(':name', "%$name%");
-   $stmt_rooms->bindValue(':type', "%$type%");
-   $stmt_rooms->bindValue(':status', "%$status%");
    $stmt_rooms->bindValue(':limit', $limit, PDO::PARAM_INT);
    $stmt_rooms->bindValue(':offset', $offset, PDO::PARAM_INT);
    $stmt_rooms->execute();
@@ -195,27 +188,10 @@ if (isset($_SESSION['toast_message'])) {
 
             <form action="kamar.php" method="GET">
             <!-- Filter -->
-               <div class="mb-5 grid grid-cols-3 gap-3">
+               <div class="mb-5 grid grid-cols-2 gap-3">
                   <div class="relative w-full">
                      <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
                      <input type="text" id="room_name" placeholder="Cari Nama Kamar" name="name" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                  </div>
-                  <div class="relative w-full">
-                     <label for="type" class="block text-sm font-medium text-gray-700">Jenis Kamar</label>
-                     <select id="type" name="room_type" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="" disabled selected class="text-gray-300" >Pilih Jenis Kamar</option>
-                        <option value="km_luar">Kamar Mandi Luar</option>
-                        <option value="km_dalam">Kamar Mandi Dalam</option>
-                     </select>
-                  </div>
-                  <div class="relative w-full">
-                     <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                     <select id="status" name="room_type" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="" disabled selected class="text-gray-300">Pilih Status Kamar</option>
-                        <option value="1">Tersedia</option>
-                        <option value="2">Sedang Diperbaiki</option>
-                        <option value="3">Terisi</option>
-                     </select>
                   </div>
                </div>
                <!-- Filter -->
@@ -462,7 +438,7 @@ if (isset($_SESSION['toast_message'])) {
             </div>
 
             <div class="flex justify-end gap-5">
-                <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
+               <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Edit</button>
             </div>
         </form>
@@ -497,28 +473,21 @@ if (isset($_SESSION['toast_message'])) {
 
    // Open and Close Modal
 // Open and Close Modal
-const openModalButton = document.getElementById('open-modal');
+// Open and Close Modal
 const closeModalButton = document.getElementById('close-modal-icon');
 const closeModalCancelButton = document.getElementById('close-modal-cancel'); 
-const modal = document.getElementById('room-modal-add');
-const modalEdit = document.getElementById('room-modal-edit');
-
-openModalButton.addEventListener('click', function() {
-   modal.classList.remove('hidden');
-   // Menyembunyikan sidebar dan navbar ketika modal dibuka
-   // document.getElementById('sidebar').classList.add('hidden');
-   // document.querySelector('nav').classList.add('hidden');
-});
-
-closeModalButton.addEventListener('click', function() {
-   modal.classList.add('hidden');
-   document.getElementById('sidebar').classList.remove('hidden');
-   document.querySelector('nav').classList.remove('hidden');
-});
+const modalEdit = document.getElementById('room-modal-edit');  // Pastikan modal yang benar
 
 // Tombol Batal untuk menutup modal
 closeModalCancelButton.addEventListener('click', function() {
-   modal.classList.add('hidden');
+   modalEdit.classList.add('hidden');  // Pastikan menambahkan class 'hidden' pada modal yang tepat
+   document.getElementById('sidebar').classList.remove('hidden');  // Menampilkan kembali sidebar jika diperlukan
+   document.querySelector('nav').classList.remove('hidden');  // Menampilkan kembali navbar jika diperlukan
+});
+
+// Menutup modal menggunakan tombol close (X)
+closeModalButton.addEventListener('click', function() {
+   modalEdit.classList.add('hidden');
    document.getElementById('sidebar').classList.remove('hidden');
    document.querySelector('nav').classList.remove('hidden');
 });
