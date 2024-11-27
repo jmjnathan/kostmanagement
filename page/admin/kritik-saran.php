@@ -40,6 +40,19 @@ try {
    exit();
 }
 ?>
+<!-- Toast Fungsi -->
+<?php
+session_start();
+if (isset($_SESSION['toast_message'])) {
+    echo "<script>
+        window.onload = function() {
+            showToast('" . $_SESSION['toast_message'] . "');
+        }
+    </script>";
+    unset($_SESSION['toast_message']); // Hapus pesan setelah ditampilkan
+}
+?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -59,6 +72,24 @@ try {
    }
 </style>
 
+<style>
+    #toast {
+      visibility: hidden; /* Awalnya tersembunyi */
+      min-width: 250px;
+      background-color: #28a745; /* Warna hijau */
+      color: white; /* Teks putih */
+      text-align: center;
+      border-radius: 5px; /* Sudut membulat */
+      padding: 16px;
+      position: fixed; /* Tetap di satu posisi */
+      z-index: 1000; /* Agar tampil di atas elemen lain */
+      bottom: 20px; /* Jarak dari bawah */
+      right: 20px; /* Jarak dari kanan */
+      font-size: 17px; /* Ukuran font */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    }
+</style>
+
 <!-- Sidebar -->
 <div id="sidebar" class="hidden md:block w-72 h-full bg-white text-gray-800 fixed top-0 left-0 p-5  flex-col shadow-lg z-50">
    <div class="mb-6 text-center">
@@ -73,7 +104,6 @@ try {
          <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-semibold  hover:bg-gray-100 items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
          <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
          <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
-         <li><a href="perabotan.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-cabinet text-xl"></i><span>Perabotan</span></a></li>
          <li><a href="komplain.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-chat text-xl"></i><span>Komplain</span></a></li>
          <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
          <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
@@ -212,7 +242,7 @@ try {
    <div class="bg-white rounded-lg w-1/2 p-6">
       <h2 class="text-xl font-semibold mb-4">Balasan untuk Kritik dan Saran</h2>
       <form action="../../function/admin/kritik-saran/edit-kritik-saran.php" method="POST">
-         <input type="hidden" name="id" id="kritik_id"> <!-- Untuk menyimpan ID kritik-saran yang akan dibalas -->
+         <input type="hidden" name="id" id="id"> <!-- Untuk menyimpan ID kritik-saran yang akan dibalas -->
          <div class="mb-4">
             <label for="isi_feedback" class="block text-gray-700">Balasan:</label>
             <textarea id="isi_feedback" name="feedback" rows="4" class="w-full p-2 border rounded-md" required></textarea>         </div>
@@ -233,6 +263,8 @@ try {
    </div>
 </div>
 
+<div id="toast"></div>
+
 
 </body>
 </html>
@@ -241,22 +273,32 @@ try {
 <script>
    // Fungsi untuk membuka modal dan mengisi data
    function openModal(button) {
-      var id = button.getAttribute('data-id');
-      var feedback = button.getAttribute('data-feedback');
-      var status = button.getAttribute('data-status');
-      
-      // Isi data ke dalam modal
-      document.getElementById('id').value = id;
-      document.getElementById('isi_feedback').value = feedback;
-      document.getElementById('status').value = status;
+   var id = button.getAttribute('data-id');
+   var feedback = button.getAttribute('data-feedback');
+   var status = button.getAttribute('data-status');
 
-      // Tampilkan modal
-      document.getElementById('feedbackModal').classList.remove('hidden');
-   }
+   // Perbaikan akses ke input hidden
+   document.getElementById('id').value = id;
+   document.getElementById('isi_feedback').value = feedback;
+   document.getElementById('status').value = status;
+
+   // Tampilkan modal
+   document.getElementById('feedbackModal').classList.remove('hidden');
+}
 
    // Fungsi untuk menutup modal
    function closeModal() {
       document.getElementById('feedbackModal').classList.add('hidden');
    }
+
+// Fungsi Toast Notification
+   function showToast(message) {
+        var toast = document.getElementById("toast");
+        toast.innerHTML = message;
+        toast.style.visibility = "visible";
+        setTimeout(function() {
+            toast.style.visibility = "hidden";
+        }, 3000); // Toast akan menghilang setelah 3 detik
+    }
 </script>
 
