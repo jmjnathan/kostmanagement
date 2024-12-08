@@ -29,6 +29,9 @@ try {
    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
    $admin_name = $admin['name'] ?? 'Admin';
 
+
+   // $name = isset($_GET['name']) ? $_GET['name'] : '';   
+
    // Query untuk mengambil data kritik dan saran
    $sql = 
    "SELECT 
@@ -40,6 +43,7 @@ try {
       rooms R on P.room_id = R.id
    ";
    $stmt_rooms = $pdo->prepare($sql);
+   // $stmt_rooms->bindValue(':name', "%$name%");
    $stmt_rooms->execute();
    $rooms = $stmt_rooms->fetchAll(PDO::FETCH_ASSOC);
 
@@ -125,15 +129,7 @@ if (isset($_SESSION['toast_message'])) {
 <!-- Main Content -->
 <div class="md:ml-72 flex flex-col min-h-screen">
    <!-- Navbar -->
-   <nav class="flex items-center justify-between bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
-      <form action="#" class="flex items-center space-x-2">
-         <div class="relative">
-            <input type="search" placeholder="Search..." class="border rounded-md px-4 py-2 w-full md:w-64">
-            <button type="submit" class="absolute right-0 top-0 p-2">
-               <i class='bx bx-search text-xl'></i>
-            </button>
-         </div>
-      </form>
+   <nav class="flex items-center justify-end bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
       <div class="flex items-center space-x-4">
          <!-- Profile -->
          <a href="#" class="profile">
@@ -152,6 +148,29 @@ if (isset($_SESSION['toast_message'])) {
             <div class="justify-between flex mb-5">
                <h2 class="text-2xl font-semibold mb-4">Daftar Penghuni</h2>
             </div>
+
+            <form action="penghuni.php" method="GET">
+            <!-- Filter -->
+               <div class="mb-5 grid grid-cols-2 gap-3">
+                  <div class="relative w-full">
+                     <label for="name" class="block text-sm font-medium text-gray-700">Nama Penghuni</label>
+                     <input type="text" id="room_name" placeholder="Cari Nama Penghuni" name="name" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                  </div>
+               </div>
+               <!-- Filter -->
+
+               <div class="flex items-center justify-end mb-5">
+                  <!-- Tombol Find -->
+                  <button type="submit" class="flex items-center justify-center gap-2 w-32 bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2 text-white font-semibold shadow">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 4a7 7 0 011 13.938V21l5-5-5-5v3.062A5.975 5.975 0 0017 12a6 6 0 10-6 6c1.453 0 2.77-.48 3.939-1.281L12 17V7c0-1.343.672-2.602 1.745-3.485L14 3H11z" />
+                     </svg>
+                     Cari
+                  </button>
+                  <!-- Tombol Find -->
+               </div>
+            </form>
+
             
             <!-- Table to display rooms -->
             <div class="overflow-x-auto">
