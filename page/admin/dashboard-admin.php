@@ -17,7 +17,7 @@
       $dbname = 'kos_management';  
       $username = 'root'; 
       $password = '';  
-
+   
       try {
          $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
          $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -32,6 +32,10 @@
          $totalRoomsQuery = $pdo->query("SELECT COUNT(*) as total_rooms FROM rooms");
          $totalRooms = $totalRoomsQuery->fetch(PDO::FETCH_ASSOC)['total_rooms'];
 
+         //Query Untuk Menghitung Total Penghuni
+         $totalPenghuniQuery = $pdo->query("SELECT COUNT(*) as total_penghuni FROM penghuni");
+         $totalPenghuni = $totalPenghuniQuery->fetch(PDO::FETCH_ASSOC)['total_penghuni'];
+
          // Query untuk menghitung kamar kosong (status 'Tersedia')
          $emptyRoomsQuery = $pdo->query("SELECT COUNT(*) as empty_rooms FROM rooms WHERE status = 'Tersedia'");
          $emptyRooms = $emptyRoomsQuery->fetch(PDO::FETCH_ASSOC)['empty_rooms'];
@@ -39,7 +43,15 @@
          echo 'Connection failed: ' . $e->getMessage();
          exit();
       }
+
       ?>
+<?php
+setlocale(LC_TIME, 'id_ID.UTF-8'); // Mengatur locale ke bahasa Indonesia
+date_default_timezone_set('Asia/Jakarta'); // Menetapkan timezone Jakarta
+
+$bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
+?>
+
 
       <!DOCTYPE html>
       <html lang="en">
@@ -122,7 +134,9 @@
                      <i class="bx bx-user text-3xl text-white"></i>
                      <div>
                         <h2 class="text-lg text-white md:text-xl font-semibold">Total Penghuni</h2>
-                        <p class="mt-2 text-white">150 penghuni</p>
+                        <p class="mt-2 text-white">
+                           <?php echo htmlspecialchars($totalPenghuni) . ' Penghuni'; ?>
+                        </p></p>
                      </div>
                   </div>
             </div>
@@ -152,7 +166,9 @@
 
 <!-- Table Riwayat Pembayaran -->
          <div class="bg-white p-4 rounded-lg shadow-md">
-            <h2 class="text-lg md:text-xl font-semibold mb-4">Riwayat Pembayaran</h2>
+            <h2 class="text-lg md:text-xl font-semibold mb-4">
+               Riwayat Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
+            </h2>
             <div class="overflow-x-auto">
                <table class="min-w-full table-auto">
                      <thead>
