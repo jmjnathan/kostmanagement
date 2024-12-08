@@ -45,6 +45,10 @@
                'description' => $description
          ]);
 
+         $_SESSION['toast_message'] = "Data berhasil ditambahkan!";
+         header('Location: ../../../page/admin/kamar.php');
+         exit();
+
          // Redirect ke halaman kamar setelah berhasil menambahkan
          header('Location: ../../../page/admin/kamar.php');
          exit();

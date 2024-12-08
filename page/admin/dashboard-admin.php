@@ -17,7 +17,7 @@
       $dbname = 'kos_management';  
       $username = 'root'; 
       $password = '';  
-
+   
       try {
          $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
          $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -32,6 +32,10 @@
          $totalRoomsQuery = $pdo->query("SELECT COUNT(*) as total_rooms FROM rooms");
          $totalRooms = $totalRoomsQuery->fetch(PDO::FETCH_ASSOC)['total_rooms'];
 
+         //Query Untuk Menghitung Total Penghuni
+         $totalPenghuniQuery = $pdo->query("SELECT COUNT(*) as total_penghuni FROM penghuni");
+         $totalPenghuni = $totalPenghuniQuery->fetch(PDO::FETCH_ASSOC)['total_penghuni'];
+
          // Query untuk menghitung kamar kosong (status 'Tersedia')
          $emptyRoomsQuery = $pdo->query("SELECT COUNT(*) as empty_rooms FROM rooms WHERE status = 'Tersedia'");
          $emptyRooms = $emptyRoomsQuery->fetch(PDO::FETCH_ASSOC)['empty_rooms'];
@@ -39,14 +43,22 @@
          echo 'Connection failed: ' . $e->getMessage();
          exit();
       }
+
       ?>
+<?php
+setlocale(LC_TIME, 'id_ID.UTF-8'); // Mengatur locale ke bahasa Indonesia
+date_default_timezone_set('Asia/Jakarta'); // Menetapkan timezone Jakarta
+
+$bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
+?>
+
 
       <!DOCTYPE html>
       <html lang="en">
       <head>
          <meta charset="UTF-8">
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
+         <script src="https://cdn.tailwindcss.com"></script>        
          <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
          <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
          <title>Dashboard</title>
@@ -60,25 +72,24 @@
       </style>
 
       <!-- Sidebar -->
-      <div id="sidebar" class="hidden md:block w-72 h-full bg-white text-gray-800 fixed top-0 left-0 p-5  flex-col shadow-lg z-50">
+      <div id="sidebar" class="hidden md:block w-72 h-full bg-gradient-to-r from-indigo-500 to-blue-500 text-gray-800 fixed top-0 left-0 p-5  flex-col shadow-lg z-50">
          <div class="mb-6 text-center">
-            <img src="../../assets/logo/Kozie.png" alt="Logo" class="h-20 mx-auto"> 
-            <h1 class="text-lg font-semibold text-blue-800 mt-4 uppercase">
+            <img src="../../assets/logo/Kozie.png" alt="Logo" class="h-20 mx-auto rounded-full"> 
+            <h1 class="text-lg font-semibold text-white mt-4 uppercase">
                   Dashboard for Admin
             </h1>
          </div>
          <nav>
          <ul class="space-y-4">
-            <li><a href="dashboard-admin.php" class="block px-4 py-2 rounded-md text-blue-500 font-semibold hover:bg-gray-100 items-center space-x-3"><i class="bx bx-home text-xl"></i><span>Dashboard Overview</span></a></li>
-            <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
-            <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
-            <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
-            <li><a href="perabotan.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-cabinet text-xl"></i><span>Perabotan</span></a></li>
-            <li><a href="komplain.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-chat text-xl"></i><span>Komplain</span></a></li>
-            <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
-            <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
-            <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
-            <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:bg-red-100  items-center space-x-3"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
+            <li><a href="dashboard-admin.php" class="block px-4 py-2 rounded-md text-white font-semibold bg-tr hover:text-blue-300 items-center space-x-3 shadow-lg "><i class="bx bx-home text-xl"></i><span>Dashboard Overview</span></a></li>
+            <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
+            <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
+            <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
+            <li><a href="komplain.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-chat text-xl"></i><span>Komplain</span></a></li>
+            <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
+            <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-semibold  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
+            <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
+            <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-semibold"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
          </ul>
          </nav>
       </div>
@@ -123,7 +134,9 @@
                      <i class="bx bx-user text-3xl text-white"></i>
                      <div>
                         <h2 class="text-lg text-white md:text-xl font-semibold">Total Penghuni</h2>
-                        <p class="mt-2 text-white">150 penghuni</p>
+                        <p class="mt-2 text-white">
+                           <?php echo htmlspecialchars($totalPenghuni) . ' Penghuni'; ?>
+                        </p></p>
                      </div>
                   </div>
             </div>
@@ -153,7 +166,9 @@
 
 <!-- Table Riwayat Pembayaran -->
          <div class="bg-white p-4 rounded-lg shadow-md">
-            <h2 class="text-lg md:text-xl font-semibold mb-4">Riwayat Pembayaran</h2>
+            <h2 class="text-lg md:text-xl font-semibold mb-4">
+               Riwayat Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
+            </h2>
             <div class="overflow-x-auto">
                <table class="min-w-full table-auto">
                      <thead>

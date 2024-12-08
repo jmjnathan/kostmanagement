@@ -20,7 +20,7 @@
 <body class="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 to-blue-500">
     <div class="flex flex-col md:flex-row max-w-3xl w-full bg-white rounded-lg shadow-xl">
         <!-- Left Section - Login Form -->
-        <div class="w-full md:w-1/2 p-8">
+        <div class="w-full md:w-1/2 p-8 justify-center">
             <h2 class="text-4xl font-bold text-center text-blue-600 mb-4">
                 KOSKOZY
             </h2>
@@ -44,9 +44,9 @@
                       Login
                   </button>
                 </div>
-                <p class="text-center mt-4">
+                <!-- <p class="text-center mt-4">
                     <a href="#" class="text-sm text-blue-500 hover:underline">Lupa Password?</a>
-                </p>
+                </p> -->
             </form>
         </div>
 

@@ -24,6 +24,10 @@ if (isset($_GET['id'])) {
         $stmt = $pdo->prepare("DELETE FROM rooms WHERE id = :id");
         $stmt->execute(['id' => $room_id]);
 
+        $_SESSION['toast_message'] = "Data berhasil dihapus!";
+        header('Location: ../../../page/admin/kamar.php');
+        exit();
+
         // Redirect ke halaman kamar setelah penghapusan
         header('Location: ../../../page/admin/kamar.php');
         exit();
