@@ -1,4 +1,4 @@
-      <?php
+<?php
       session_start();
 
       // Cek apakah pengguna sudah login
@@ -28,7 +28,7 @@
          $admin = $stmt->fetch(PDO::FETCH_ASSOC);
          $admin_name = $admin['name'] ?? 'Admin';
 
-               // Query untuk menghitung total kamar
+         // Query untuk menghitung total kamar
          $totalRoomsQuery = $pdo->query("SELECT COUNT(*) as total_rooms FROM rooms");
          $totalRooms = $totalRoomsQuery->fetch(PDO::FETCH_ASSOC)['total_rooms'];
 
@@ -37,8 +37,13 @@
          $totalPenghuni = $totalPenghuniQuery->fetch(PDO::FETCH_ASSOC)['total_penghuni'];
 
          // Query untuk menghitung kamar kosong (status 'Tersedia')
-         $emptyRoomsQuery = $pdo->query("SELECT COUNT(*) as empty_rooms FROM rooms WHERE status = 'Tersedia'");
+         $emptyRoomsQuery = $pdo->query("SELECT COUNT(*) as empty_rooms FROM rooms WHERE status = '1'");
          $emptyRooms = $emptyRoomsQuery->fetch(PDO::FETCH_ASSOC)['empty_rooms'];
+
+         // Query untuk menghitung kamar kosong (status 'Tersedia')
+         $fixRoomsQuery = $pdo->query("SELECT COUNT(*) as fix_rooms FROM rooms WHERE status = '2'");
+         $fixRooms = $fixRoomsQuery->fetch(PDO::FETCH_ASSOC)['fix_rooms'];
+         
       } catch (PDOException $e) {
          echo 'Connection failed: ' . $e->getMessage();
          exit();
@@ -52,8 +57,7 @@ date_default_timezone_set('Asia/Jakarta'); // Menetapkan timezone Jakarta
 $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
 ?>
 
-
-      <!DOCTYPE html>
+<!DOCTYPE html>
       <html lang="en">
       <head>
          <meta charset="UTF-8">
@@ -104,15 +108,7 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
       <!-- Main Content -->
       <div class="md:ml-72 flex flex-col min-h-screen">
          <!-- Navbar -->
-         <nav class="flex items-center justify-between bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
-            <form action="#" class="flex items-center space-x-2">
-                  <div class="relative">
-                     <input type="search" placeholder="Search..." class="border rounded-md px-4 py-2 w-full md:w-64">
-                     <button type="submit" class="absolute right-0 top-0 p-2">
-                        <i class='bx bx-search text-xl'></i>
-                     </button>
-                  </div>
-            </form>
+         <nav class="flex items-center justify-end bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
             <div class="flex items-center space-x-4">
                   <!-- Profile -->
                   <a href="#" class="profile">
@@ -127,7 +123,7 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
          <!-- Content -->
          <div class="p-8 mt-16">
          <h1 class="text-xl md:text-2xl font-semibold mb-6">Dashboard Overview</h1>
-         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-5">
+         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-5">
             <!-- Total Penghuni -->
             <div class="bg-blue-500 rounded-lg shadow-md p-6">
                   <div class="flex items-center space-x-4">
@@ -150,6 +146,19 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                      </div>
                   </div>
             </div>
+
+            <div class="bg-orange-500 rounded-lg shadow-md p-6">
+               <a href="kamar.php" class="flex items-center space-x-4">
+                  <i class="bx bx-wrench text-3xl text-white"></i>
+                  <div>
+                     <h2 class="text-lg text-white md:text-xl font-semibold">Kamar Diperbaiki</h2>
+                     <p class="mt-2 text-white">
+                        <?php echo htmlspecialchars($fixRooms) . ' / ' . htmlspecialchars($totalRooms) . ' Kamar'; ?>                       
+                     </p>
+                  </div>
+               </a>
+            </div>
+
             <!-- Empty Rooms -->
             <div class="bg-green-500 rounded-lg shadow-md p-6">
                <a href="kamar.php" class="flex items-center space-x-4">
@@ -162,6 +171,8 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                   </div>
                </a>
             </div>
+
+            
          </div>
 
 <!-- Table Riwayat Pembayaran -->
@@ -187,7 +198,6 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                                  </td>
                            </tr>
                         <?php else: ?>
-                           <!-- If there is data, display rows -->
                            <?php foreach ($payments as $payment): ?>
                                  <tr class="border-b">
                                     <td class="px-4 py-2"><?= htmlspecialchars($payment['user_id']) ?></td>
@@ -203,12 +213,10 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
          </div>
       </div>
 
-
       <script>
          // Sidebar Toggle Script
          const sidebar = document.getElementById('sidebar');
          const toggleSidebar = document.getElementById('toggle-sidebar');
-
          toggleSidebar.addEventListener('click', () => {
             sidebar.classList.toggle('hidden');
          });

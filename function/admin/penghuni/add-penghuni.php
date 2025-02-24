@@ -1,31 +1,95 @@
 <?php
+session_start();
+
+// Cek apakah pengguna sudah login
+if (!isset($_SESSION['username'])) {
+    header('Location: index.php'); // Redirect jika belum login
+    exit();
+}
+
+// Cek role pengguna, hanya admin yang boleh mengakses
+if ($_SESSION['role'] !== 'admin') {
+    header('Location: dashboard-user.php'); // Redirect jika bukan admin
+    exit();
+}
+
 // Koneksi ke database
-include($_SERVER['DOCUMENT_ROOT'] . '/kostmanagement/page/admin/penghuni.php');
+$host = 'localhost';
+$dbname = 'kos_management';
+$username = 'root';
+$password = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nomor_kamar = $_POST['nomor_kamar'];
-    $nama_penghuni = $_POST['nama_penghuni'];
-    $nomor_hp = $_POST['nomor_hp'];
-    $alamat_asal = $_POST['alamat_asal'];
-    $nik = $_POST['nik'];
-    $tanggal_masuk = $_POST['tanggal_masuk'];
-    $jenis_kelamin = $_POST['jenis_kelamin'];
-    $status = $_POST['status'];
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Query untuk menambahkan data penghuni
-    $sql = "INSERT INTO penghuni_kos (nomor_kamar, nama_penghuni, nomor_hp, alamat_asal, nik, tanggal_masuk, jenis_kelamin, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param($nomor_kamar, $nama_penghuni, $nomor_hp, $alamat_asal, $nik, $tanggal_masuk, $jenis_kelamin, $status);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Debug: Periksa data yang dikirim dari form
+        var_dump($_POST); // Hapus ini setelah debugging selesai
 
-    if ($stmt->execute()) {
-        // Redirect kembali ke halaman penghuni setelah berhasil
-        header('Location: /admin/penghuni.php?status=success');
-    } else {
-        // Tampilkan pesan error jika gagal
-        echo "Error: " . $stmt->error;
+        // Validasi input agar tidak kosong
+        $nama  = !empty($_POST['nama']) ? trim($_POST['nama']) : null;
+        $jenis_kelamin  = !empty($_POST['capacity']) ? $_POST['capacity'] : null;
+        $ktp            = !empty($_POST['ktp']) ? $_POST['ktp'] : null;
+        $alamat_asal    = !empty($_POST['alamat_asal']) ? $_POST['alamat_asal'] : null;
+        $nomor_telepon  = !empty($_POST['nomor_telepon']) ? $_POST['nomor_telepon'] : null;
+        $nomor_darurat  = !empty($_POST['nomor_darurat']) ? $_POST['nomor_darurat'] : null;
+        $room_id        = !empty($_POST['room_id']) ? $_POST['room_id'] : null;
+        $status         = !empty($_POST['status']) ? $_POST['status'] : null;
+        $tanggal_masuk  = !empty($_POST['tanggal_masuk']) ? $_POST['tanggal_masuk'] : null;
+        $username       = !empty($_POST['username']) ? $_POST['username'] : null;
+        $password       = !empty($_POST['password']) ? $_POST['password'] : null;
+
+        // Jika ada data yang kosong, beri pesan error
+        if (!$nama || !$jenis_kelamin || !$ktp || !$alamat_asal || !$nomor_telepon || !$room_id || !$status || !$tanggal_masuk || !$username || !$password) {
+            $_SESSION['toast_message'] = "Semua field wajib diisi!";
+            header('Location: ../../../page/admin/penghuni.php');
+            exit();
+        }
+
+        // Hash password sebelum disimpan
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // Mulai transaksi
+        $pdo->beginTransaction();
+
+        try {
+            // Insert data penghuni
+            $stmt = $pdo->prepare("INSERT INTO penghuni 
+                (nama, jenis_kelamin, ktp, alamat_asal, nomor_telepon, nomor_darurat, room_id, status, tanggal_masuk, username, password) 
+                VALUES (:nama, :jenis_kelamin, :ktp, :alamat_asal, :nomor_telepon, :nomor_darurat, :room_id, :status, :tanggal_masuk, :username, :password)");
+            $stmt->execute([
+                'nama' => $nama,
+                'jenis_kelamin' => $jenis_kelamin,
+                'ktp' => $ktp,
+                'alamat_asal' => $alamat_asal,
+                'nomor_telepon' => $nomor_telepon,
+                'nomor_darurat' => $nomor_darurat,
+                'room_id' => $room_id,
+                'status' => $status,
+                'tanggal_masuk' => $tanggal_masuk,
+                'username' => $username,
+                'password' => $hashed_password
+            ]);
+
+            // Update status kamar menjadi "terisi"
+            $update_stmt = $pdo->prepare("UPDATE rooms SET status = '1' WHERE id = :room_id");
+            $update_stmt->execute(['room_id' => $room_id]);
+
+            // Commit transaksi jika semua berhasil
+            $pdo->commit();
+
+            $_SESSION['toast_message'] = "Data penghuni berhasil ditambahkan!";
+            header('Location: ../../../page/admin/penghuni.php');
+            exit();
+        } catch (Exception $e) {
+            // Rollback jika terjadi error
+            $pdo->rollback();
+            echo "Error: " . $e->getMessage();
+        }
     }
-    $stmt->close();
-    $conn->close();
+} catch (PDOException $e) {
+    echo 'Connection failed: ' . $e->getMessage();
+    exit();
 }
 ?>
