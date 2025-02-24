@@ -26,145 +26,58 @@ try {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <title>Dashboard</title>
+    <title>Dashboard Penghuni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
-
-<style>
-    body {
-        font-family: 'Poppins', sans-serif;
-    }
-</style>
-
-<!-- Sidebar -->
-<div id="sidebar" class="hidden md:block w-72 h-full bg-white text-gray-800 fixed top-0 left-0 p-5  flex-col shadow-lg z-50">
-    <div class="mb-6 text-center">
-        <img src="../../assets/logo/Kozie.png" alt="Logo" class="h-20 mx-auto"> 
-        <h1 class="text-lg font-semibold text-blue-800 mt-4 uppercase">
-            Dashboard for Users
-        </h1>
-    </div>
-    <nav>
-    <ul class="space-y-4">
-        <li>
-            <a href="#" class="block px-4 py-2 rounded-md text-blue-500 font-semibold hover:bg-gray-100 flex items-center space-x-3">
-                <i class="bx bx-home text-xl"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100 flex items-center space-x-3">
-                <i class="bx bx-bed text-xl"></i>
-                <span>Kamar</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100 flex items-center space-x-3">
-                <i class="bx bx-user text-xl"></i>
-                <span>Penghuni</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100 flex items-center space-x-3">
-                <i class="bx bx-wallet text-xl"></i>
-                <span>Pembayaran</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100 flex items-center space-x-3">
-                <i class="bx bx-cabinet text-xl"></i>
-                <span>Perabotan</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100 flex items-center space-x-3">
-                <i class="bx bx-chat text-xl"></i>
-                <span>Komplain</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="block px-4 py-2 rounded-md font-semibold hover:bg-gray-100 flex items-center space-x-3">
-                <i class="bx bx-wrench text-xl"></i>
-                <span>Maintenance</span>
-            </a>
-        </li>
-        <li>
-            <a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:bg-red-100 flex items-center space-x-3">
-                <i class="bx bx-log-out text-xl"></i>
-                <span>Logout</span>
-            </a>
-        </li>
-    </ul>
-</nav>
-</div>
-
-<!-- Mobile Sidebar Toggle -->
-<div class="md:hidden fixed top-4 left-4 z-50">
-    <button id="toggle-sidebar" class="bg-blue-500 text-white p-2 rounded-md shadow">
-        <i class="bx bx-menu text-xl"></i>
-    </button>
-</div>
-
-<!-- Main Content -->
-<div class="md:ml-72 flex flex-col min-h-screen">
-    <!-- Navbar -->
-    <nav class="flex items-center justify-between bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
-        <form action="#" class="flex items-center space-x-2">
-            <div class="relative">
-                <input type="search" placeholder="Search..." class="border rounded-md px-4 py-2 w-full md:w-64">
-                <button type="submit" class="absolute right-0 top-0 p-2">
-                    <i class='bx bx-search text-xl'></i>
-                </button>
-            </div>
-        </form>
-        <div class="flex items-center space-x-4">
-            <!-- Profile -->
-            <a href="#" class="profile">
-                <img src="../../assets/logo/user.png" alt="Profile" class="h-10 w-10 rounded-full">
-            </a>
-            <span class="text-sm md:text-lg font-semibold text-blue-700">
-                Welcome, <?php echo htmlspecialchars($admin_name); ?>!
-            </span>
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-5 min-h-screen fixed">
+            <h2 class="text-lg font-bold text-center mb-6">Dashboard Penghuni</h2>
+            <ul class="space-y-4">
+                <li><a href="#" class="block py-2 px-4 bg-white text-blue-500 rounded-md">Pembayaran</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-blue-400 rounded-md">Riwayat Pembayaran</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-blue-400 rounded-md">List Kamar</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-blue-400 rounded-md">Pengajuan Maintenance</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-blue-400 rounded-md">Kritik & Saran</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-blue-400 rounded-md">Pengajuan Keluar Kos</a></li>
+            </ul>
         </div>
-    </nav>
-
-    <!-- Content -->
-    <div class="p-8 mt-16">
-        <h1 class="text-xl md:text-2xl font-semibold mb-6">Dashboard Overview</h1>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <!-- Card Example -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg md:text-xl font-semibold">Total Users</h2>
-                <p class="mt-2 text-gray-600">150 Users</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg md:text-xl font-semibold">Active Rooms</h2>
-                <p class="mt-2 text-gray-600">45 Rooms</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg md:text-xl font-semibold">Pending Payments</h2>
-                <p class="mt-2 text-gray-600">5 Payments</p>
+        
+        <!-- Main Content -->
+        <div class="ml-64 p-8 w-full">
+            <h1 class="text-2xl font-semibold text-gray-700 mb-6">Selamat Datang di Dashboard</h1>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h2 class="text-lg font-semibold">Pembayaran</h2>
+                    <p class="text-gray-600">Lihat dan lakukan pembayaran kos.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h2 class="text-lg font-semibold">Riwayat Pembayaran</h2>
+                    <p class="text-gray-600">Cek histori pembayaran kos Anda.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h2 class="text-lg font-semibold">List Kamar</h2>
+                    <p class="text-gray-600">Lihat daftar kamar yang tersedia.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h2 class="text-lg font-semibold">Pengajuan Maintenance</h2>
+                    <p class="text-gray-600">Ajukan perbaikan fasilitas kos.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h2 class="text-lg font-semibold">Kritik & Saran</h2>
+                    <p class="text-gray-600">Berikan masukan untuk pengelola kos.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h2 class="text-lg font-semibold">Pengajuan Keluar Kos</h2>
+                    <p class="text-gray-600">Ajukan keluar dari kos dengan mudah.</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-    // Sidebar Toggle Script
-    const sidebar = document.getElementById('sidebar');
-    const toggleSidebar = document.getElementById('toggle-sidebar');
-
-    toggleSidebar.addEventListener('click', () => {
-        sidebar.classList.toggle('hidden');
-    });
-</script>
-
 </body>
 </html>

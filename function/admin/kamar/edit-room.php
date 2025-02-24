@@ -1,5 +1,5 @@
 <?php
-// Koneksi PDO ke database (pastikan sudah ada di awal file)
+// Koneksi PDO ke database
 $host = 'localhost';
 $dbname = 'kos_management';
 $username = 'root';
@@ -8,78 +8,57 @@ $password = '';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    if (isset($_GET['id'])) {
-        $room_id = $_GET['id'];
-
-        // Query untuk mendapatkan data kamar berdasarkan ID
-        $stmt = $pdo->prepare("SELECT * FROM rooms WHERE id = :id");
-        $stmt->execute(['id' => $room_id]);
-        $room = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$room) {
-            // Jika data tidak ditemukan, tampilkan error atau redirect ke halaman lain
-            echo "Room not found.";
-            exit();
-        }
-    }
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
     exit();
 }
-?>
 
+// Jika terdapat `GET` ID untuk menampilkan data maintenance tertentu
+if (isset($_GET['id'])) {
+    $request_id = $_GET['id'];
+
+    // Ambil data maintenance berdasarkan ID
+    $stmt = $pdo->prepare("SELECT * FROM maintenance WHERE request_id = :request_id");
+    $stmt->execute(['request_id' => $request_id]);
+    $maintenance = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$maintenance) {
+        echo "Maintenance request not found.";
+        exit();
+    }
+}
+?>
 <?php
-// Koneksi PDO ke database (pastikan sudah ada di awal file)
+// Proses jika form di-submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Ambil data dari form POST
-    $roomId = $_POST['id'];
-    $roomName = $_POST['name'];
-    $roomType = $_POST['room_type'];
-    $roomAc = $_POST['ac'];
-    $roomCapacity = $_POST['capacity'];
-    $roomPrice = $_POST['price'];
-    $roomStatus = $_POST['status'];
-    $roomDescription = $_POST['description'];
+    $request_id = $_POST['request_id'];
+    $room_id = $_POST['room_id'];
+    $description = $_POST['description'];
+    $status = $_POST['status'];
 
-    // Validasi input (optional, Anda bisa menambahkan lebih banyak validasi)
-    if (empty($roomName) || empty($roomType) || empty($roomAc) || empty($roomCapacity) || empty($roomPrice) || empty($roomStatus)) {
-        echo "Please fill in all fields.";
+    // Validasi input
+    if (empty($status)) {
+        echo "Status cannot be empty.";
         exit();
     }
 
-    // Update data kamar di database
+    // Update status pada tabel maintenance
     try {
-        $stmt = $pdo->prepare("UPDATE rooms SET 
-            name = :name, 
-            type = :type, 
-            ac = :ac, 
-            capacity = :capacity, 
-            price = :price, 
-            status = :status, 
-            description = :description 
-            WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE maintenance SET 
+            status = :status,
+            updated_at = NOW()
+            WHERE request_id = :request_id");
 
         $stmt->execute([
-            'name' => $roomName,
-            'type' => $roomType,
-            'ac' => $roomAc,
-            'capacity' => $roomCapacity,
-            'price' => $roomPrice,
-            'status' => $roomStatus,
-            'description' => $roomDescription,
-            'id' => $roomId
+            'status' => $status,
+            'request_id' => $request_id
         ]);
 
-         // Set pesan ke session
-         $_SESSION['toast_message'] = "Data berhasil diubah!";
-         header('Location: ../../../page/admin/kamar.php');
-         exit();
-         
-        // Redirect setelah sukses
-         header('Location: ../../../page/admin/kamar.php');
-          exit();
-
+        // Redirect dengan pesan sukses
+        $_SESSION['toast_message'] = "Maintenance response updated successfully!";
+        header('Location: ../../../page/admin/maintenance.php');
+        exit();
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
         exit();
