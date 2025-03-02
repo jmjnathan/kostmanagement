@@ -43,6 +43,13 @@
          // Query untuk menghitung kamar kosong (status 'Tersedia')
          $fixRoomsQuery = $pdo->query("SELECT COUNT(*) as fix_rooms FROM rooms WHERE status = '2'");
          $fixRooms = $fixRoomsQuery->fetch(PDO::FETCH_ASSOC)['fix_rooms'];
+
+         // Query untuk menghitung total uang masuk bulan ini
+         $currentMonth = date('Y-m');
+         $totalIncomeQuery = $pdo->prepare("SELECT SUM(jumlah) as total_income FROM pembayaran WHERE DATE_FORMAT(created_at, '%Y-%m') = :currentMonth AND status = 'lunas'");
+         $totalIncomeQuery->execute(['currentMonth' => $currentMonth]);
+         $totalIncome = $totalIncomeQuery->fetch(PDO::FETCH_ASSOC)['total_income'] ?? 0;
+
          
       } catch (PDOException $e) {
          echo 'Connection failed: ' . $e->getMessage();
@@ -127,9 +134,9 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
             <!-- Total Penghuni -->
             <div class="bg-blue-500 rounded-lg shadow-md p-6">
                   <div class="flex items-center space-x-4">
-                     <i class="bx bx-user text-3xl text-white"></i>
+                     <i class="bx bx-user text-2xl text-white"></i>
                      <div>
-                        <h2 class="text-lg text-white md:text-xl font-semibold">Total Penghuni</h2>
+                        <h2 class="text-md text-white md:text-xl font-semibold">Total Penghuni</h2>
                         <p class="mt-2 text-white">
                            <?php echo htmlspecialchars($totalPenghuni) . ' Penghuni'; ?>
                         </p></p>
@@ -171,6 +178,20 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                   </div>
                </a>
             </div>
+
+            <!-- Total Uang Masuk Bulan Ini -->
+            <div class="bg-purple-500 rounded-lg shadow-md p-6">
+               <div class="flex items-center space-x-4">
+                  <i class="bx bx-money text-3xl text-white"></i>
+                  <div>
+                     <h2 class="text-lg text-white md:text-xl font-semibold">Uang Masuk</h2>
+                     <p class="mt-2 text-white">
+                        Rp <?php echo number_format($totalIncome, 0, ',', '.'); ?>
+                     </p>
+                  </div>
+               </div>
+            </div>
+
 
             
          </div>

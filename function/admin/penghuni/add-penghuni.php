@@ -29,7 +29,7 @@ try {
 
         // Validasi input agar tidak kosong
         $nama  = !empty($_POST['nama']) ? trim($_POST['nama']) : null;
-        $jenis_kelamin  = !empty($_POST['capacity']) ? $_POST['capacity'] : null;
+        $jenis_kelamin  = !empty($_POST['jenis_kelamin']) ? $_POST['jenis_kelamin'] : null;
         $ktp            = !empty($_POST['ktp']) ? $_POST['ktp'] : null;
         $alamat_asal    = !empty($_POST['alamat_asal']) ? $_POST['alamat_asal'] : null;
         $nomor_telepon  = !empty($_POST['nomor_telepon']) ? $_POST['nomor_telepon'] : null;

@@ -64,8 +64,7 @@ try {
          rooms B ON B.id = A.room_id
       WHERE 
          A.nama LIKE :name
-      ORDER BY 
-         A.nama ASC 
+      ORDER BY A.tanggal_masuk DESC
       LIMIT :limit OFFSET :offset";
    $stmt_rooms = $pdo->prepare($sql);
    $stmt_rooms->bindValue(':name', "%$name%");
@@ -247,22 +246,25 @@ if (isset($_SESSION['toast_message'])) {
                                  <!-- Tombol Edit -->
                                  <a href="#" 
                                     class="edit-room-btn text-blue-500 hover:text-blue-700" 
-                                    data-room-id="<?= $room['id'] ?>" 
-                                    data-name="<?= htmlspecialchars($room['name']) ?>" 
-                                    data-type="<?= htmlspecialchars($room['type']) ?>" 
-                                    data-ac="<?= htmlspecialchars($room['ac']) ?>" 
-                                    data-capacity="<?= htmlspecialchars($room['capacity']) ?>" 
-                                    data-price="<?= htmlspecialchars($room['price']) ?>" 
-                                    data-status="<?= htmlspecialchars($room['status']) ?>">
-                                       <i class="bx bx-edit"></i>
+                                    data-id="<?= $room['id'] ?>" 
+                                    data-name="<?= htmlspecialchars($room['nama']) ?>" 
+                                    data-room-id="<?= htmlspecialchars($room['room_id']) ?>" 
+                                    data-nomor-telepon="<?= htmlspecialchars($room['nomor_telepon']) ?>" 
+                                    data-jenis-kelamin="<?= htmlspecialchars($room['jenis_kelamin']) ?>" 
+                                    data-alamat-asal="<?= htmlspecialchars($room['alamat_asal']) ?>" 
+                                    data-status="<?= htmlspecialchars($room['status']) ?>" 
+                                    onclick="openModal(this)">
+                                    <i class="bx bx-edit"></i>
                                  </a>
+
                                  <!-- Tombol Hapus -->
                                  <a href="../../function/admin/penghuni/delete-room.php?id=<?= $room['id'] ?>" 
                                     class="ml-4 text-red-500 hover:text-red-700" 
                                     onclick="return confirm('Apakah Anda yakin ingin menghapus penghuni ini?');">
-                                       <i class="bx bx-trash"></i>
+                                    <i class="bx bx-trash text-xl"></i>
                                  </a>
                               </td>
+
                               <td class="px-4 py-2">
                                  <div class="font-bold"><?= htmlspecialchars($room['nama']) ?></div>
                                  <div class="text-sm text-gray-600"><?= htmlspecialchars($room['nomor_telepon']) ?></div>
@@ -297,7 +299,8 @@ if (isset($_SESSION['toast_message'])) {
 <div id="room-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
    <div class="bg-white rounded-lg p-6 shadow-md w-2/3">
       <div class="mb-4">
-         <h2 class="text-xl font-semibold">Tambah Penghuni</h2>
+         <h2 class="text-xl font-semibold mb-2">Tambah Penghuni</h2>
+         <label class="text-red-500 text-sm ">Semua field wajib diisi</label>
          <!-- Close Modal Icon -->
          <button id="close-modal-icon" class="text-red-500 absolute top-2 right-2">
             <i class="bx bx-x text-3xl"></i>
@@ -392,103 +395,89 @@ if (isset($_SESSION['toast_message'])) {
             <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Tambah</button>
          </div>
       </form>
-
    </div>
 </div>
 <!-- Modal ADD-->
 
 <!-- Modal Edit -->
-<div id="room-modal-edit" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 shadow-md w-2/3">
-        <div class="mb-4">
-            <h2 class="text-xl font-semibold">Edit penghuni</h2>
-            <!-- Close Modal Icon -->
-            <button id="close-modal-icon" class="text-red-500 absolute top-2 right-2">
-                <i class="bx bx-x text-3xl"></i>
-            </button>
-        </div>
-        <!-- Form untuk Edit penghuni -->
-        <form action="../../function/admin/penghuni/edit-room.php?id=<?php echo $room['id']; ?>" method="POST">
-            <input type="hidden" name="id" value="<?php echo $room['id']; ?>">
+<div id="edit-room-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
+   <div class="bg-white rounded-lg p-6 shadow-md w-2/3 relative">
+      <h2 class="text-xl font-semibold mb-2">Edit Penghuni</h2>
+      <label class="text-red-500 text-sm ">Semua field wajib diisi</label>
+      <!-- Close Modal Icon -->
+      <button id="close-edit-modal" class="absolute top-2 right-2 text-red-500 text-3xl">&times;</button>
 
-            <div class="mb-4">
-                <label for="name" class="block text-sm font-medium text-gray-700">Nama penghuni</label>
-                <input type="text" id="room_name" name="name" value="<?php echo htmlspecialchars($room['name']); ?>"
-                    class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            </div>
-            <div class="flex space-x-4 mb-4">
-                <div class="flex-1">
-                    <label for="type" class="block text-sm font-medium text-gray-700">Jenis penghuni</label>
-                    <select id="type" name="room_type"
-                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="km_luar" <?php echo ($room['type'] === 'km_luar') ? 'selected' : ''; ?>>penghuni Mandi Luar</option>
-                        <option value="km_dalam" <?php echo ($room['type'] === 'km_dalam') ? 'selected' : ''; ?>>penghuni Mandi Dalam</option>
-                    </select>
-                </div>
-                <div class="flex-1">
-                    <label for="ac" class="block text-sm font-medium text-gray-700">AC</label>
-                    <select id="ac" name="ac"
-                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="AC" <?php echo ($room['ac'] === 'AC') ? 'selected' : ''; ?>>AC</option>
-                        <option value="Non-Ac" <?php echo ($room['ac'] === 'Non-Ac') ? 'selected' : ''; ?>>Non-Ac</option>
-                    </select>
-                </div>
+      <form id="edit-form" action="../../function/admin/penghuni/edit-penghuni.php" method="POST">
+         <input type="hidden" id="edit_id" name="id">
+
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label class="block text-sm font-medium text-gray-700">Nama Penghuni</label>
+               <input type="text" id="edit_nama" name="nama" class="py-3 px-4 mt-1 block w-full border rounded-md">
             </div>
 
-            <div class="flex space-x-4 mb-4">
-                <div class="flex-1">
-                    <label for="capacity" class="block text-sm font-medium text-gray-700">Kapasitas</label>
-                    <select id="capacity" name="capacity"
-                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="1" <?php echo ($room['capacity'] == 1) ? 'selected' : ''; ?>>1 orang</option>
-                        <option value="2" <?php echo ($room['capacity'] == 2) ? 'selected' : ''; ?>>2 orang</option>
-                    </select>
-                </div>
-                <div class="flex-1">
-                    <label for="price" class="block text-sm font-medium text-gray-700">Harga</label>
-                    <input type="number" id="price" name="price" value="<?php echo htmlspecialchars($room['price']); ?>"
-                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
+            <div class="flex-1">
+               <label for="edit_room_id" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
+               <select name="edit_room_id" id="edit_room_id" class="mt-1 p-2 border rounded w-full">
+                  <option value="">-- Pilih Kamar --</option>
+                  <?php
+                  try {
+                     $pdo = new PDO("mysql:host=localhost;dbname=kos_management", "root", "");
+                     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                     $sql = "SELECT id, name FROM rooms WHERE status = '1' ORDER BY name ASC";
+                     $stmt = $pdo->prepare($sql);
+                     $stmt->execute();
+                     while ($room = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        echo '<option value="' . htmlspecialchars($room['id']) . '">' . htmlspecialchars($room['name']) . '</option>';
+                     }
+                  } catch (PDOException $e) {
+                     echo '<option value="">Error: ' . htmlspecialchars($e->getMessage()) . '</option>';
+                  }
+                  ?>
+               </select>
             </div>
+         </div>
 
-            <div class="mb-4">
-                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                <select id="status" name="status"
-                    class="mt-1 py-3 px-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option value="1" <?php echo ($room['status'] == 1) ? 'selected' : ''; ?>>Tersedia</option>
-                    <option value="2" <?php echo ($room['status'] == 2) ? 'selected' : ''; ?>>Sedang Diperbaiki</option>
-                    <option value="3" <?php echo ($room['status'] == 3) ? 'selected' : ''; ?>>Terisi</option>
-                </select>
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label class="block text-sm font-medium text-gray-700">NIK</label>
+               <input type="text" id="edit_ktp" name="ktp" class="py-3 px-4 mt-1 block w-full border rounded-md">
             </div>
+            <div class="flex-1">
+               <label class="block text-sm font-medium text-gray-700">Alamat Asal</label>
+               <input type="text" id="edit_alamat_asal" name="alamat_asal" class="py-3 px-4 mt-1 block w-full border rounded-md">
+            </div>
+         </div>
 
-            <!-- Deskripsi penghuni -->
-            <div class="mb-4">
-                <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi penghuni</label>
-                <textarea id="description" name="description" rows="4"
-                    class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"><?php echo htmlspecialchars($room['description']); ?></textarea>
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+               <input type="text" id="edit_nomor_telepon" name="nomor_telepon" class="py-3 px-4 mt-1 block w-full border rounded-md">
             </div>
+            <div class="flex-1">
+               <label class="block text-sm font-medium text-gray-700">Status</label>
+               <select id="edit_status" name="status" class="py-3 px-4 mt-1 block w-full border rounded-md">
+                  <option value="active">Active</option>
+                  <option value="non-active">Non Active</option>
+               </select>
+            </div>
+         </div>
 
-            <div class="flex justify-end gap-5">
-               <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Edit</button>
-            </div>
-        </form>
-    </div>
+         <div class="flex justify-end gap-5">
+            <button type="button" id="close-edit-modal-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Simpan Perubahan</button>
+         </div>
+      </form>
+   </div>
 </div>
-<!-- End Modal Edit -->
 
-
-
+<!-- Modal Edit -->
 <div id="toast"></div>
-
-
 </body>
 </html>
 
 
 <!-- Modal EDIT-->
-
-
 <script>
 
    function changeLimit() {
@@ -505,9 +494,6 @@ if (isset($_SESSION['toast_message'])) {
         document.getElementById('password').value = '123456789';
     }
 
-   // Open and Close Modal
-// Open and Close Modal
-// Open and Close Modal
 const closeModalButton = document.getElementById('close-modal-icon');
 const closeModalCancelButton = document.getElementById('close-modal-cancel'); 
 const modalEdit = document.getElementById('room-modal-edit');  // Pastikan modal yang benar
@@ -539,21 +525,21 @@ editRoomButtons.forEach(button => {
       e.preventDefault();
 
       // Get data attributes from the clicked button
+      const id = this.getAttribute('data-id');
+      const name = this.getAttribute('data-name');
       const roomId = this.getAttribute('data-room-id');
-      const roomName = this.getAttribute('data-name');
-      const roomType = this.getAttribute('data-type');
-      const roomAc = this.getAttribute('data-ac');
-      const roomCapacity = this.getAttribute('data-capacity');
-      const roomPrice = this.getAttribute('data-price');
-      const roomStatus = this.getAttribute('data-status');
+      const nik = this.getAttribute('data-nik');
+      const alamatAsal = this.getAttribute('data-alamat-asal');
+      const nomorTelepon = this.getAttribute('data-nomor-telepon');
+      const status = this.getAttribute('data-status');
 
-      // Set the values in the modal
-      document.getElementById('room_name').value = roomName;
-      document.getElementById('type').value = roomType;
-      document.getElementById('ac').value = roomAc;
-      document.getElementById('capacity').value = roomCapacity;
-      document.getElementById('price').value = roomPrice;
-      document.getElementById('status').value = roomStatus;
+      // ngeset data ke modal edit
+      document.getElementById('nama').value = name;
+      document.getElementById('room_id').value = roomId;
+      document.getElementById('nik').value = nik;
+      document.getElementById('alamat_asal').value = alamatAsal;
+      document.getElementById('nomor_telepon').value = nomorTelepon;
+      document.getElementById('status').value = status;
 
       // Show the edit modal
       document.getElementById('room-modal-edit').classList.remove('hidden');
@@ -578,6 +564,41 @@ function showToast(message) {
             toast.style.visibility = "hidden";
         }, 3000); // Toast akan menghilang setelah 3 detik
     }
+
+
+    // Tampilkan Modal Edit dengan Data Penghuni
+    document.addEventListener("DOMContentLoaded", function () {
+    // Event Listener untuk tombol Edit (Menggunakan Event Delegation)
+    document.body.addEventListener("click", function (event) {
+        if (event.target.closest(".edit-room-btn")) {
+            event.preventDefault();
+
+            let button = event.target.closest(".edit-room-btn");
+
+            // Ambil data dari atribut tombol
+            document.getElementById("edit_id").value = button.dataset.id;
+            document.getElementById("edit_nama").value = button.dataset.name;
+            document.getElementById("edit_room_id").value = button.dataset.room_id;
+            document.getElementById("edit_ktp").value = button.dataset.ktp;
+            document.getElementById("edit_alamat_asal").value = button.dataset.alamat_asal;
+            document.getElementById("edit_nomor_telepon").value = button.dataset.nomor_telepon;
+            document.getElementById("edit_status").value = button.dataset.status;
+
+            // Tampilkan modal edit
+            document.getElementById("edit-room-modal").classList.remove("hidden");
+        }
+    });
+
+    // Tutup Modal Edit saat tombol "X" atau "Batal" diklik
+    document.getElementById("close-edit-modal").addEventListener("click", function () {
+        document.getElementById("edit-room-modal").classList.add("hidden");
+    });
+    document.getElementById("close-edit-modal-btn").addEventListener("click", function () {
+        document.getElementById("edit-room-modal").classList.add("hidden");
+    });
+});
+
+
 
 </script>
 

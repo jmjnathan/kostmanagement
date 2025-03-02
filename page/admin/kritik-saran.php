@@ -117,15 +117,7 @@ if (isset($_SESSION['toast_message'])) {
 <!-- Main Content -->
 <div class="md:ml-72 flex flex-col min-h-screen">
    <!-- Navbar -->
-   <nav class="flex items-center justify-between bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
-      <form action="#" class="flex items-center space-x-2">
-         <div class="relative">
-            <input type="search" placeholder="Search..." class="border rounded-md px-4 py-2 w-full md:w-64">
-            <button type="submit" class="absolute right-0 top-0 p-2">
-               <i class='bx bx-search text-xl'></i>
-            </button>
-         </div>
-      </form>
+   <nav class="flex items-center justify-end bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
       <div class="flex items-center space-x-4">
          <!-- Profile -->
          <a href="#" class="profile">
