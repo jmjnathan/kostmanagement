@@ -29,7 +29,7 @@ try {
 
         // Validasi input agar tidak kosong
         $nama  = !empty($_POST['nama']) ? trim($_POST['nama']) : null;
-        $jenis_kelamin  = !empty($_POST['capacity']) ? $_POST['capacity'] : null;
+        $jenis_kelamin  = !empty($_POST['jenis_kelamin']) ? $_POST['jenis_kelamin'] : null;
         $ktp            = !empty($_POST['ktp']) ? $_POST['ktp'] : null;
         $alamat_asal    = !empty($_POST['alamat_asal']) ? $_POST['alamat_asal'] : null;
         $nomor_telepon  = !empty($_POST['nomor_telepon']) ? $_POST['nomor_telepon'] : null;
@@ -73,7 +73,7 @@ try {
             ]);
 
             // Update status kamar menjadi "terisi"
-            $update_stmt = $pdo->prepare("UPDATE rooms SET status = '1' WHERE id = :room_id");
+            $update_stmt = $pdo->prepare("UPDATE rooms SET status = '3' WHERE id = :room_id");
             $update_stmt->execute(['room_id' => $room_id]);
 
             // Commit transaksi jika semua berhasil

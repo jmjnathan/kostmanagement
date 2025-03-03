@@ -49,8 +49,42 @@ try {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <title>Laporan Maintenance</title>
+    <title>KosKozie</title>
+    <link rel="icon" type="image/png" class="rounded-full" href="../../assets/logo/Kozie.png">
 </head>
+
+<style>
+   body {
+      font-family: 'Poppins', sans-serif;
+   }
+   /* Menambahkan z-index pada modal dan tombol */
+   #room-modal {
+      z-index: 1050; /* Atur modal agar berada di atas */
+   }
+   #room-modal-edit{
+      z-index: 1050; /* Atur modal agar berada di atas */
+   }
+   #close-modal-cancel {
+      z-index: 1060; /* Pastikan tombol Batal berada di atas modal */
+   }
+
+   #toast {
+      visibility: hidden; /* Awalnya tersembunyi */
+      min-width: 250px;
+      background-color: #28a745; /* Warna hijau */
+      color: white; /* Teks putih */
+      text-align: center;
+      border-radius: 5px; /* Sudut membulat */
+      padding: 16px;
+      position: fixed; /* Tetap di satu posisi */
+      z-index: 1000; /* Agar tampil di atas elemen lain */
+      bottom: 20px; /* Jarak dari bawah */
+      right: 20px; /* Jarak dari kanan */
+      font-size: 17px; /* Ukuran font */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    }
+
+</style>
 <body class="bg-gray-100 min-h-screen font-poppins">
 
 <!-- Sidebar -->
@@ -76,15 +110,21 @@ try {
    </nav>
 </div>
 
+<!-- Main Content -->
 <div class="md:ml-72 flex flex-col min-h-screen">
-    <!-- Navbar -->
-    <nav class="flex items-center justify-between bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
-        <div class="flex items-center space-x-4">
-            <span class="text-sm md:text-lg font-semibold text-blue-700">
-                Welcome, <?php echo htmlspecialchars($admin_name); ?>!
-            </span>
-        </div>
-    </nav>
+   <!-- Navbar -->
+   <nav class="flex items-center justify-end bg-white p-4 fixed top-0  md:left-72 right-0 shadow-md z-10">
+      <div class="flex items-center space-x-4 ">
+         <!-- Profile -->
+         <a href="#" class="profile">
+            <img src="../../assets/logo/user.png" alt="Profile" class="h-10 w-10 rounded-full">
+         </a>
+         <span class="text-sm md:text-lg font-semibold text-blue-700">
+            Welcome, <?php echo htmlspecialchars($admin_name); ?>!
+         </span>
+      </div>
+   </nav>
+
 
     <!-- Content -->
     <div class="p-8 mt-16">
