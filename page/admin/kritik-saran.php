@@ -142,14 +142,10 @@ if (isset($_SESSION['toast_message'])) {
                <table class="min-w-full table-auto">
                   <thead>
                      <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-left">Aksi</th>
                         <th class="px-4 py-2 text-left">Nama Pengirim</th>
                         <th class="px-4 py-2 text-left">Tanggal Kirim</th>
                         <th class="px-4 py-2 text-left">Kritik</th>
                         <th class="px-4 py-2 text-left">Kategori</th>
-                        <th class="px-4 py-2 text-center">Status</th>
-                        <th class="px-4 py-2 text-left">Balasan Feedback</th>
-                        <th class="px-4 py-2 text-left">Tanggal Feedback</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -160,15 +156,6 @@ if (isset($_SESSION['toast_message'])) {
                      <?php else: ?>
                         <?php foreach ($rooms as $room): ?>
                            <tr>
-                              <td class="px-4 py-2 w-24">
-                                 <!-- Edit button in the table -->
-                                 <a href="#" class="edit-room-btn text-blue-500 hover:text-blue-700" data-id="<?= $room['id'] ?>" data-feedback="<?= htmlspecialchars($room['isi_feedback'] ?? '') ?>" data-status="<?= htmlspecialchars($room['status'] ?? '') ?>" onclick="openModal(this)">
-                                    <i class="bx bx-edit"></i>
-                                 </a>
-                                 <a href="../../function/admin/kritik-saran/delete-kritik-saran.php?id=<?= $room['id'] ?>" class="ml-4 text-red-500 hover:text-red-700" onclick="return confirm('Apakah Anda yakin ingin menghapus kritik dan saran ini?');">
-                                    <i class="bx bx-trash"></i>
-                                 </a>
-                              </td>
                               <td class="px-4 py-2 w-44"><?php echo htmlspecialchars($room['nama_pengirim'] ?? '-'); ?></td>
                               <td class="px-4 py-2 w-40">
                                  <?php 
@@ -189,34 +176,6 @@ if (isset($_SESSION['toast_message'])) {
                               </td>
                               <td class="px-4 py-2"><?php echo htmlspecialchars($room['judul'] ?? '-'); ?></td>
                               <td class="px-4 py-2"><?php echo htmlspecialchars($room['kategori'] ?? '-'); ?></td>
-                              <td class="px-4 py-2 text-center 
-                                 <?php 
-                                       // Add the class based on status value
-                                       if ($room['status'] == 'Selesai') {
-                                          echo 'text-green-500 font-semibold';
-                                       } elseif ($room['status'] == 'Belum di baca') {
-                                          echo 'text-red-500 font-semibold';
-                                       } elseif ($room['status'] == 'Diproses') {
-                                          echo 'text-yellow-500 font-semibold';
-                                       }
-                                 ?>">
-                                 <?php echo htmlspecialchars($room['status']); ?>
-                              </td>                              
-                              <td class="px-4 py-2"><?php echo htmlspecialchars($room['isi_feedback'] ?? '-'); ?></td>
-                              <td class="px-4 py-2 w-40">
-                                 <?php 
-                                 if (!empty($room['tanggal_feedback'])) {
-                                    $tanggal_feedback = date_create($room['tanggal_feedback']);
-                                    $tanggal_feedback_indonesia = date_format($tanggal_feedback, "j") . " " . 
-                                                                  $bulan[(int)date_format($tanggal_feedback, "m")] . " " . 
-                                                                  date_format($tanggal_feedback, "Y");
-                                    echo $tanggal_feedback_indonesia;
-                                 } else {
-                                    echo '-';
-                                 }
-                                 ?>
-                              </td>
-
                            </tr>
                         <?php endforeach; ?>
                      <?php endif; ?>

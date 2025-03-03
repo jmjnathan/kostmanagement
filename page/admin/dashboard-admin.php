@@ -50,6 +50,39 @@
          $totalIncomeQuery->execute(['currentMonth' => $currentMonth]);
          $totalIncome = $totalIncomeQuery->fetch(PDO::FETCH_ASSOC)['total_income'] ?? 0;
 
+         // Query pending payment
+         $pendingPaymentsQuery = $pdo->query("SELECT COUNT(*) as pending_payments FROM pembayaran WHERE status = 'pending'");
+         $pendingPayments = $pendingPaymentsQuery->fetch(PDO::FETCH_ASSOC)['pending_payments'] ?? 0;
+         
+         // Tangkap filter bulan-tahun dari GET request
+         $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : '';
+
+         // Pagination
+         $limit = 10; // Jumlah data per halaman
+         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+         $offset = ($page - 1) * $limit;
+
+         $sql = "SELECT 
+                     A.*, 
+                     B.nama AS nama_penghuni, 
+                     B.nomor_telepon AS penghuni_nomor_telepon,
+                     C.name AS nomor_kamar
+               FROM pembayaran A 
+               INNER JOIN penghuni B ON A.penghuni_id = B.id
+               INNER JOIN rooms C ON B.room_id = C.id
+               WHERE (:month_year = '' OR DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year)
+               ORDER BY A.tanggal_bayar DESC
+               LIMIT :limit OFFSET :offset";
+
+         $stmt = $pdo->prepare($sql);
+         $stmt->bindValue(':month_year', $month_year, PDO::PARAM_STR);
+         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+         $stmt->execute();
+
+$payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
          
       } catch (PDOException $e) {
          echo 'Connection failed: ' . $e->getMessage();
@@ -148,8 +181,8 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                   <div class="flex items-center space-x-4">
                      <i class="bx bx-wallet text-3xl text-white"></i>
                      <div>
-                        <h2 class="text-lg text-white md:text-xl font-semibold">Transaksi Pending</h2>
-                        <p class="mt-2 text-white">5 Transaksi</p>
+                        <h2 class="text-lg text-white md:text-xl font-semibold">Belum Bayar</h2>
+                        <p class="mt-2 text-white"><?php echo htmlspecialchars($pendingPayments) . ' Transaksi'; ?></p>
                      </div>
                   </div>
             </div>
@@ -177,8 +210,10 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                      </p>
                   </div>
                </a>
-            </div>
+            </div>         
+         </div>
 
+         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 mb-5">
             <!-- Total Uang Masuk Bulan Ini -->
             <div class="bg-purple-500 rounded-lg shadow-md p-6">
                <div class="flex items-center space-x-4">
@@ -192,47 +227,58 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                </div>
             </div>
 
-
-            
+            <!-- Pembayaran Pending -->
+            <div class="bg-yellow-500 rounded-lg shadow-md p-6">
+               <div class="flex items-center space-x-4">
+                  <i class="bx bx-time text-3xl text-white"></i>
+                  <div>
+                     <h2 class="text-lg text-white md:text-xl font-semibold">Transaksi Pending</h2>
+                     <p class="mt-2 text-white"><?php echo $pendingPayments; ?> Transaksi</p>
+                  </div>
+               </div>
+            </div>
          </div>
 
 <!-- Table Riwayat Pembayaran -->
-         <div class="bg-white p-4 rounded-lg shadow-md">
-            <h2 class="text-lg md:text-xl font-semibold mb-4">
-               Riwayat Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
-            </h2>
-            <div class="overflow-x-auto">
-               <table class="min-w-full table-auto">
-                     <thead>
-                        <tr class="bg-gray-100">
-                           <th class="px-4 py-2 text-left font-medium">Nama Penghuni</th>
-                           <th class="px-4 py-2 text-left font-medium">No Kamar</th>
-                           <th class="px-4 py-2 text-left font-medium">Tanggal Pembayaran</th>
-                           <th class="px-4 py-2 text-left font-medium">Status</th>
+<!-- Table Riwayat Pembayaran -->
+<div class="bg-white p-4 rounded-lg shadow-md">
+    <h2 class="text-lg md:text-xl font-semibold mb-4">
+        Riwayat Pembayaran Bulan <?php echo ucfirst(strftime('%B %Y', strtotime($bulan_tahun . '-01'))); ?>
+    </h2>
+    <div class="overflow-x-auto">
+        <table class="min-w-full table-auto">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left font-medium">Nama Penghuni</th>
+                    <th class="px-4 py-2 text-left font-medium">No Kamar</th>
+                    <th class="px-4 py-2 text-left font-medium">Tanggal Pembayaran</th>
+                    <th class="px-4 py-2 text-left font-medium">Jumlah</th>
+                    <th class="px-4 py-2 text-left font-medium">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($payments)): ?>
+                    <tr>
+                        <td colspan="5" class="px-4 py-2 text-center text-gray-500">
+                            Data tidak ditemukan
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($payments as $payment): ?>
+                        <tr class="border-b">
+                            <td class="px-4 py-2"><?= htmlspecialchars($payment['nama_penghuni']) ?></td>
+                            <td class="px-4 py-2"><?= htmlspecialchars($payment['nomor_kamar']) ?></td>
+                            <td class="px-4 py-2"><?= date('d-m-Y', strtotime($payment['tanggal_bayar'])) ?></td>
+                            <td class="px-4 py-2">Rp <?= number_format($payment['jumlah'], 0, ',', '.') ?></td>
+                            <td class="px-4 py-2"><?= htmlspecialchars($payment['status']) ?></td>
                         </tr>
-                     </thead>
-                     <tbody>
-                        <?php if (empty($payments)): ?>
-                           <tr>
-                                 <td colspan="5" class="px-4 py-2 text-center text-gray-500">
-                                    Data tidak ditemukan
-                                 </td>
-                           </tr>
-                        <?php else: ?>
-                           <?php foreach ($payments as $payment): ?>
-                                 <tr class="border-b">
-                                    <td class="px-4 py-2"><?= htmlspecialchars($payment['user_id']) ?></td>
-                                    <td class="px-4 py-2"><?= number_format($payment['amount'], 2) ?></td>
-                                    <td class="px-4 py-2"><?= date('d-m-Y', strtotime($payment['payment_date'])) ?></td>
-                                    <td class="px-4 py-2"><?= htmlspecialchars($payment['status']) ?></td>
-                                 </tr>
-                           <?php endforeach; ?>
-                        <?php endif; ?>
-                     </tbody>
-               </table>
-            </div>
-         </div>
-      </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 
       <script>
          // Sidebar Toggle Script
