@@ -73,7 +73,7 @@ try {
             ]);
 
             // Update status kamar menjadi "terisi"
-            $update_stmt = $pdo->prepare("UPDATE rooms SET status = '1' WHERE id = :room_id");
+            $update_stmt = $pdo->prepare("UPDATE rooms SET status = '3' WHERE id = :room_id");
             $update_stmt->execute(['room_id' => $room_id]);
 
             // Commit transaksi jika semua berhasil

@@ -101,7 +101,8 @@ if (isset($_SESSION['toast_message'])) {
    <script src="https://cdn.tailwindcss.com"></script>
    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-   <title>Dashboard</title>
+   <title>KosKozie</title>
+   <link rel="icon" type="image/png" class="rounded-full" href="../../assets/logo/Kozie.png">
 </head>
 <body class="bg-gray-100 min-h-screen">
 
@@ -231,7 +232,6 @@ if (isset($_SESSION['toast_message'])) {
                         <th class="px-4 py-2 text-left">Jenis Kelamin</th>
                         <th class="px-4 py-2 text-center">Status</th>
                         <th class="px-4 py-2 text-center">Tanggal Masuk</th>
-                        <th class="px-4 py-2 text-center">Tanggal Keluar</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -258,7 +258,7 @@ if (isset($_SESSION['toast_message'])) {
                                  </a>
 
                                  <!-- Tombol Hapus -->
-                                 <a href="../../function/admin/penghuni/delete-room.php?id=<?= $room['id'] ?>" 
+                                 <a href="../../function/admin/penghuni/delete-penghuni.php?id=<?= $room['id'] ?>" 
                                     class="ml-4 text-red-500 hover:text-red-700" 
                                     onclick="return confirm('Apakah Anda yakin ingin menghapus penghuni ini?');">
                                     <i class="bx bx-trash text-xl"></i>
@@ -280,9 +280,6 @@ if (isset($_SESSION['toast_message'])) {
                               </td>
                               <td class="px-4 py-2 text-center">
                                  <?= date('d-m-Y', strtotime($room['tanggal_masuk'])) ?>
-                              </td>
-                              <td class="px-4 py-2 text-center">
-                                 <?= date('d-m-Y', strtotime($room['tanggal_keluar'])) ?>
                               </td>
                            </tr>
                         <?php endforeach; ?>

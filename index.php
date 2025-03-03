@@ -6,6 +6,7 @@
     <title>KosKozy - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="assets/Kozie.png">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
