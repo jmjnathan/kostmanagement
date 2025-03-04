@@ -24,9 +24,6 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Debug: Periksa data yang dikirim dari form
-        var_dump($_POST); // Hapus ini setelah debugging selesai
-
         // Validasi input agar tidak kosong
         $nama  = !empty($_POST['nama']) ? trim($_POST['nama']) : null;
         $jenis_kelamin  = !empty($_POST['jenis_kelamin']) ? $_POST['jenis_kelamin'] : null;
@@ -72,7 +69,17 @@ try {
                 'password' => $hashed_password
             ]);
 
-            // Update status kamar menjadi "terisi"
+            $user_stmt = $pdo->prepare("INSERT INTO users (name,  username, password_hash, role) 
+                            VALUES (:name, :username, :password, 'user')");
+            $user_stmt->execute([
+                'name' => $nama, 
+                'username' => $username,
+                'password' => $hashed_password
+            ]);
+
+
+
+            // Update status kamar menjadi "terisi" (3)
             $update_stmt = $pdo->prepare("UPDATE rooms SET status = '3' WHERE id = :room_id");
             $update_stmt->execute(['room_id' => $room_id]);
 
