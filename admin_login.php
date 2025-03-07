@@ -1,6 +1,6 @@
 <!-- <?php if (isset($_GET['error'])): ?>
     <div class="bg-red-500 text-white px-4 py-2 rounded-md text-center mb-4">
-        <?php echo htmlspecialchars($_GET['error']); ?>
+    <?php echo htmlspecialchars($_GET['error']); ?>
     </div>
 <?php endif; ?> -->
 
@@ -24,9 +24,9 @@
         <!-- Left Section - Login Form -->
         <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
             <h2 class="text-4xl font-bold text-center text-blue-600 mb-6 uppercase">
-                KosKozy
+                Admin KosKozy
             </h2>
-            <form action="login_process.php" method="POST">
+            <form action="login_process-admin.php" method="POST">
                 <div class="mb-4">
                     <input type="text" name="username" class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Username" required autocomplete="off"/>
                 </div>
@@ -45,7 +45,7 @@
                     </button>
                 </div>
                 <div class="mt-4 flex items-center justify-center">
-                    <a href="admin_login.php" class="text-center text-blue-600 hover:text-blue-800">Login Sebagai Admin</a>
+                    <a href="index.php" class="text-center text-blue-600 hover:text-blue-800">Login Sebagai Penghuni</a>
                 </div>
             </form>
         </div>

@@ -30,7 +30,17 @@ try {
     $admin_name = $admin['name'] ?? 'Admin';
 
     // Query untuk mengambil data pengajuan maintenance
-    $sql = "SELECT * FROM maintenance_requests";
+    $sql = 
+    "SELECT 
+            A.id, A.id_penghuni, B.nama nama_penghuni, A.id_kamar, C.name nama_kamar,
+            A.tanggal_pengajuan, A.deskripsi, A.kategori, A.status
+        FROM
+            maintenance A
+        INNER JOIN
+            penghuni B ON A.id_penghuni = B.id
+        INNER JOIN
+            rooms C ON A.id_kamar = C.id;"
+    ;
     $stmt_requests = $pdo->prepare($sql);
     $stmt_requests->execute();
     $requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
@@ -130,7 +140,9 @@ try {
     <div class="p-8 mt-16">
         <div class="bg-white rounded-lg shadow-md">
             <div class="p-6">
-                <h2 class="text-2xl font-semibold mb-4">Laporan Pengajuan Maintenance</h2>
+                <div class="justify-between flex mb-5">
+                    <h2 class="text-2xl font-semibold mb-4">Pengajuan Pemeliharaan</h2>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-auto">
                         <thead>
@@ -153,17 +165,20 @@ try {
                             <?php else: ?>
                                 <?php foreach ($requests as $request): ?>
                                     <tr>
+                                        <td class="px-4 py-2 text-center">
+                                            <a href="#" class="text-blue-500 hover:text-blue-700" onclick="openModal(<?php echo htmlspecialchars(json_encode($request)); ?>)">
+                                                <i class="bx bx-edit"></i>                                            
+                                            </a>
+                                        </td>
                                         <td class="px-4 py-2"><?php echo htmlspecialchars($request['nama_penghuni']); ?></td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['nomor_kamar']); ?></td>
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['nama_kamar']); ?></td>
                                         <td class="px-4 py-2"><?php echo htmlspecialchars($request['tanggal_pengajuan']); ?></td>
                                         <td class="px-4 py-2"><?php echo htmlspecialchars($request['deskripsi']); ?></td>
                                         <td class="px-4 py-2"><?php echo htmlspecialchars($request['kategori']); ?></td>
                                         <td class="px-4 py-2 text-center <?php echo ($request['status'] === 'Selesai' ? 'text-green-500' : 'text-yellow-500'); ?>">
                                             <?php echo htmlspecialchars($request['status']); ?>
                                         </td>
-                                        <td class="px-4 py-2 text-center">
-                                            <a href="#" class="text-blue-500 hover:text-blue-700" onclick="openModal(<?php echo htmlspecialchars(json_encode($request)); ?>)">Edit</a>
-                                        </td>
+                                        
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>

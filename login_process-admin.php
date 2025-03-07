@@ -23,16 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           $_SESSION['username'] = $user['username'];
           $_SESSION['role'] = $user['role'];
   
-          if ($user['role'] == 'user') {
-              header("Location: page/users/dashboard-users.php");
+          if ($user['role'] == 'admin') {
+              header("Location: page/admin/dashboard-admin.php");
           } else {
               // Jika role bukan 'user', tampilkan alert error
-              header("Location: index.php?error=" . urlencode("Anda tidak memiliki akses sebagai user!"));
+              header("Location: admin_login.php?error=" . urlencode("Anda tidak memiliki akses sebagai admin!"));
           }
           exit();
       } else {
           // Jika password salah, redirect dengan error di URL
-          header("Location: index.php?error=" . urlencode("Username atau password salah!"));
+          header("Location: admin_login.php?error=" . urlencode("Username atau password salah!"));
           exit();
       }
   } else {
