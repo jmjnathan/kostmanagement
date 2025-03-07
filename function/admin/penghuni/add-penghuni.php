@@ -69,15 +69,17 @@ try {
                 'password' => $hashed_password
             ]);
 
-            $user_stmt = $pdo->prepare("INSERT INTO users (name,  username, password_hash, role) 
-                            VALUES (:name, :username, :password, 'user')");
+            $penghuni_id = $pdo->lastInsertId();
+
+            $user_stmt = $pdo->prepare("INSERT INTO users (id_penghuni, name,  username, password_hash, role) 
+                            VALUES (:id_penghuni, :name, :username, :password, 'user')");
+            
             $user_stmt->execute([
+                'id_penghuni' => $penghuni_id, 
                 'name' => $nama, 
                 'username' => $username,
                 'password' => $hashed_password
             ]);
-
-
 
             // Update status kamar menjadi "terisi" (3)
             $update_stmt = $pdo->prepare("UPDATE rooms SET status = '3' WHERE id = :room_id");
