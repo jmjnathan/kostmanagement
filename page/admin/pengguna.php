@@ -32,14 +32,10 @@ try {
     // Query untuk mengambil data pengajuan maintenance
     $sql = 
     "SELECT 
-            A.id, A.id_penghuni, B.nama nama_penghuni, A.id_kamar, C.name nama_kamar,
-            A.tanggal_pengajuan, A.deskripsi, A.kategori, A.status
+            *
         FROM
-            maintenance A
-        INNER JOIN
-            penghuni B ON A.id_penghuni = B.id
-        INNER JOIN
-            rooms C ON A.id_kamar = C.id;"
+            users 
+        ;"
     ;
     $stmt_requests = $pdo->prepare($sql);
     $stmt_requests->execute();
@@ -150,14 +146,14 @@ try {
                             <th class="px-4 py-2 text-center">Aksi</th>
                                 <th class="px-4 py-2 text-left">Nama Pengguna</th>
                                 <th class="px-4 py-2 text-left">Username</th>
-                                <th class="px-4 py-2 text-left">Role</th>
+                                <th class="px-4 py-2 text-left">Kamar</th>
                                 <th class="px-4 py-2 text-left">Status</th>                                
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($requests)): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-3">Tidak ada pengajuan maintenance</td>
+                                    <td colspan="7" class="text-center py-3">Tidak ada pengguna</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($requests as $request): ?>
@@ -167,13 +163,9 @@ try {
                                                 <i class="bx bx-edit"></i>                                            
                                             </a>
                                         </td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['nama_penghuni']); ?></td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['nama_kamar']); ?></td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['tanggal_pengajuan']); ?></td>
-                                        <td class="px-4 py-2 text-center <?php echo ($request['status'] === 'Selesai' ? 'text-green-500' : 'text-yellow-500'); ?>">
-                                            <?php echo htmlspecialchars($request['status']); ?>
-                                        </td>
-                                        
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['name']); ?></td>
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['username']); ?></td>
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['role']); ?></td>                                        
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
