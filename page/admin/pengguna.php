@@ -150,7 +150,7 @@ try {
                             <th class="px-4 py-2 text-center">Aksi</th>
                                 <th class="px-4 py-2 text-left">Nama Pengguna</th>
                                 <th class="px-4 py-2 text-left">Username</th>
-                                <th class="px-4 py-2 text-left">Role</th>
+                                <th class="px-4 py-2 text-left">Kamar</th>
                                 <th class="px-4 py-2 text-left">Status</th>                                
                             </tr>
                         </thead>

@@ -90,12 +90,6 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
       }
 
       ?>
-<?php
-setlocale(LC_TIME, 'id_ID.UTF-8'); // Mengatur locale ke bahasa Indonesia
-date_default_timezone_set('Asia/Jakarta'); // Menetapkan timezone Jakarta
-
-$bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
-?>
 
 <!DOCTYPE html>
       <html lang="en">
@@ -167,16 +161,18 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-5">
             <!-- Total Penghuni -->
             <div class="bg-blue-500 rounded-lg shadow-md p-6">
+               <a href="penghuni.php" class="block">
                   <div class="flex items-center space-x-4">
                      <i class="bx bx-user text-2xl text-white"></i>
                      <div>
                         <h2 class="text-md text-white md:text-xl font-medium">Total Penghuni</h2>
                         <p class="mt-2 text-white">
                            <?php echo htmlspecialchars($totalPenghuni) . ' Penghuni'; ?>
-                        </p></p>
+                        </p>                     
                      </div>
                   </div>
-            </div>
+                  </a>
+               </div>
             <!-- Pending Payments -->
             <div class="bg-red-500 rounded-lg shadow-md p-6">
                   <div class="flex items-center space-x-4">
@@ -227,25 +223,40 @@ $bulan_tahun = strftime('%B %Y'); // Menampilkan bulan dan tahun
                   </div>
                </div>
             </div>
-
-            <!-- Pembayaran Pending -->
-            <div class="bg-yellow-500 rounded-lg shadow-md p-6">
-               <div class="flex items-center space-x-4">
-                  <i class="bx bx-time text-3xl text-white"></i>
-                  <div>
-                     <h2 class="text-lg text-white md:text-xl font-medium">Transaksi Pending</h2>
-                     <p class="mt-2 text-white"><?php echo $pendingPayments; ?> Transaksi</p>
-                  </div>
-               </div>
-            </div>
          </div>
 
 <!-- Table Riwayat Pembayaran -->
 <!-- Table Riwayat Pembayaran -->
-<div class="bg-white p-4 rounded-lg shadow-md">
-    <h2 class="text-lg md:text-xl font-semibold mb-4">
-        Riwayat Pembayaran Bulan <?php echo ucfirst(strftime('%B %Y', strtotime($bulan_tahun . '-01'))); ?>
-    </h2>
+<?php
+date_default_timezone_set('Asia/Jakarta');
+
+// Array bulan dalam bahasa Indonesia
+$bulan = [
+    'January' => 'Januari',
+    'February' => 'Februari',
+    'March' => 'Maret',
+    'April' => 'April',
+    'May' => 'Mei',
+    'June' => 'Juni',
+    'July' => 'Juli',
+    'August' => 'Agustus',
+    'September' => 'September',
+    'October' => 'Oktober',
+    'November' => 'November',
+    'December' => 'Desember'
+];
+
+// Ambil bulan dan tahun saat ini
+$bulan_inggris = date('F');
+$tahun = date('Y');
+
+// Konversi bulan ke bahasa Indonesia
+$bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
+?>
+   <div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-lg md:text-xl font-semibold mb-4">
+         Riwayat Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
+      </h2>
     <div class="overflow-x-auto">
         <table class="min-w-full table-auto">
             <thead>

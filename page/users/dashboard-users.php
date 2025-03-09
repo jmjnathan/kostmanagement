@@ -1,5 +1,4 @@
 <?php
-<<<<<<< HEAD
 session_start();
 require '../../db.php';
 
@@ -14,41 +13,7 @@ $session_username = $_SESSION['username'];
 $result = mysqli_query($conn, "SELECT name FROM users WHERE username = '$session_username'");
 $user = mysqli_fetch_assoc($result);
 $user_name = $user['name'] ?? 'Penghuni';
-=======
-   session_start();
-
-   // Cek apakah pengguna sudah login
-   if (!isset($_SESSION['username'])) {
-      header('Location: index.php'); // Jika belum login, arahkan ke halaman login
-      exit();
-   }
-
-   // Cek role pengguna, jika bukan user, alihkan ke halaman lain
-   if ($_SESSION['role'] !== 'user') {
-      header('Location: ../../logout.php'); // Jika bukan user, arahkan ke dashboard user atau halaman lain
-      exit();
-   }
-$host = 'localhost';  
-$dbname = 'kos_management';  
-$username = 'root'; 
-$password = '';  
-
-try {
-    // Membuat koneksi ke database
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $session_username = $_SESSION['username'];    
-    $stmt = $pdo->prepare("SELECT name FROM users WHERE username = :username");
-    $stmt->execute(['username' => $session_username]);
-    
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    $user_name = $user['name'] ?? 'User';
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
-    exit();
-}
->>>>>>> 065e42376b4870021c2c4524632d555a948b0082
-?>
+    ?>
 
 
 <!DOCTYPE html>
@@ -93,7 +58,6 @@ try {
 </div>
 
     </div>
-=======
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="../../assets/logo/Kozie.png">
@@ -128,27 +92,3 @@ try {
 
         <ul id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-indigo-600 text-white py-4 px-6 space-y-3 md:hidden">
             <li><a href="dashboard-users.php" class="block px-4 py-2 rounded-md font-medium hover:bg-indigo-700"><i class="bx bx-home text-xl"></i> Dashboard</a></li>
-            <li><a href="dashboard-users.php" class="block px-4 py-2 rounded-md font-medium hover:bg-indigo-700"><i class="bx bx-money text-xl"></i> Bayar Kos</a></li>
-            <li><a href="dashboard-users.php" class="block px-4 py-2 rounded-md font-medium hover:bg-indigo-700"><i class="bx bx-wrench text-xl"></i> Pengajuan Perbaikan</a></li>
-            <li><a href="dashboard-users.php" class="block px-4 py-2 rounded-md font-medium hover:bg-indigo-700"><i class="bx bx-door-open text-xl"></i> Pengajuan Keluar Kos</a></li>
-            <li><a href="dashboard-users.php" class="block px-4 py-2 rounded-md font-medium hover:bg-indigo-700"><i class="bx bx-cog text-xl"></i> Settings</a></li>
-            <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:bg-red-600"><i class="bx bx-log-out text-xl"></i> Logout</a></li>
-        </ul>
-
-        <div class="hidden sm:block">
-            <span class="text-sm md:text-base lg:text-lg font-medium truncate">
-                Welcome, <?php echo htmlspecialchars($user_name); ?>!
-            </span>
-        </div>
-
-    </nav>
-
-    <!-- Script untuk Menu Toggle -->
-    <script>
-        document.getElementById("menu-toggle").addEventListener("click", function() {
-            document.getElementById("mobile-menu").classList.toggle("hidden");
-        });
-    </script>
->>>>>>> 065e42376b4870021c2c4524632d555a948b0082
-</body>
-</html>
