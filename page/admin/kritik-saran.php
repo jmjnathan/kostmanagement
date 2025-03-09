@@ -62,7 +62,8 @@ if (isset($_SESSION['toast_message'])) {
    <script src="https://cdn.tailwindcss.com"></script>
    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-   <title>Dashboard</title>
+   <title>KosKozie</title>
+   <link rel="icon" type="image/png" class="rounded-full" href="../../assets/logo/Kozie.png">
 </head>
 <body class="bg-gray-100 min-h-screen">
 
@@ -94,21 +95,21 @@ if (isset($_SESSION['toast_message'])) {
 <div id="sidebar" class="hidden md:block w-72 h-full bg-gradient-to-r from-indigo-500 to-blue-500 text-gray-800 fixed top-0 left-0 p-5  flex-col shadow-lg z-50">
    <div class="mb-6 text-center">
       <img src="../../assets/logo/Kozie.png" alt="Logo" class="h-20 mx-auto rounded-full">
-      <h1 class="text-lg font-semibold text-white mt-4 uppercase">
+      <h1 class="text-lg font-medium text-white mt-4 uppercase">
          Dashboard for Admin
       </h1>
    </div>
    <nav>
       <ul class="space-y-4">
-            <li><a href="dashboard-admin.php" class="block px-4 py-2 rounded-md text-white font-semibold bg-tr hover:text-blue-300 items-center space-x-3 "><i class="bx bx-home text-xl"></i><span>Dashboard Overview</span></a></li>
-            <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
-            <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
-            <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
-            <li><a href="komplain.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-chat text-xl"></i><span>Komplain</span></a></li>
-            <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
-            <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-semibold  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
-            <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3 shadow-lg "><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
-            <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-semibold"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
+            <li><a href="dashboard-admin.php" class="block px-4 py-2 rounded-md text-white font-medium bg-tr hover:text-blue-300 items-center space-x-3 "><i class="bx bx-home text-xl"></i><span>Dashboard Overview</span></a></li>
+            <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
+            <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
+            <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
+            <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
+            <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
+            <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3 shadow-lg "><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
+            <li><a href="pengguna.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-group text-xl"></i><span>Pengguna</span></a></li>
+            <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
       </ul>
    </nav>
 </div>
@@ -117,21 +118,13 @@ if (isset($_SESSION['toast_message'])) {
 <!-- Main Content -->
 <div class="md:ml-72 flex flex-col min-h-screen">
    <!-- Navbar -->
-   <nav class="flex items-center justify-between bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
-      <form action="#" class="flex items-center space-x-2">
-         <div class="relative">
-            <input type="search" placeholder="Search..." class="border rounded-md px-4 py-2 w-full md:w-64">
-            <button type="submit" class="absolute right-0 top-0 p-2">
-               <i class='bx bx-search text-xl'></i>
-            </button>
-         </div>
-      </form>
+   <nav class="flex items-center justify-end bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
       <div class="flex items-center space-x-4">
          <!-- Profile -->
          <a href="#" class="profile">
             <img src="../../assets/logo/user.png" alt="Profile" class="h-10 w-10 rounded-full">
          </a>
-         <span class="text-sm md:text-lg font-semibold text-blue-700">
+         <span class="text-sm md:text-lg font-medium text-blue-700">
             Welcome, <?php echo htmlspecialchars($admin_name); ?>!
          </span>
       </div>
@@ -150,14 +143,10 @@ if (isset($_SESSION['toast_message'])) {
                <table class="min-w-full table-auto">
                   <thead>
                      <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-left">Aksi</th>
                         <th class="px-4 py-2 text-left">Nama Pengirim</th>
                         <th class="px-4 py-2 text-left">Tanggal Kirim</th>
                         <th class="px-4 py-2 text-left">Kritik</th>
                         <th class="px-4 py-2 text-left">Kategori</th>
-                        <th class="px-4 py-2 text-center">Status</th>
-                        <th class="px-4 py-2 text-left">Balasan Feedback</th>
-                        <th class="px-4 py-2 text-left">Tanggal Feedback</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -168,15 +157,6 @@ if (isset($_SESSION['toast_message'])) {
                      <?php else: ?>
                         <?php foreach ($rooms as $room): ?>
                            <tr>
-                              <td class="px-4 py-2 w-24">
-                                 <!-- Edit button in the table -->
-                                 <a href="#" class="edit-room-btn text-blue-500 hover:text-blue-700" data-id="<?= $room['id'] ?>" data-feedback="<?= htmlspecialchars($room['isi_feedback'] ?? '') ?>" data-status="<?= htmlspecialchars($room['status'] ?? '') ?>" onclick="openModal(this)">
-                                    <i class="bx bx-edit"></i>
-                                 </a>
-                                 <a href="../../function/admin/kritik-saran/delete-kritik-saran.php?id=<?= $room['id'] ?>" class="ml-4 text-red-500 hover:text-red-700" onclick="return confirm('Apakah Anda yakin ingin menghapus kritik dan saran ini?');">
-                                    <i class="bx bx-trash"></i>
-                                 </a>
-                              </td>
                               <td class="px-4 py-2 w-44"><?php echo htmlspecialchars($room['nama_pengirim'] ?? '-'); ?></td>
                               <td class="px-4 py-2 w-40">
                                  <?php 
@@ -197,34 +177,6 @@ if (isset($_SESSION['toast_message'])) {
                               </td>
                               <td class="px-4 py-2"><?php echo htmlspecialchars($room['judul'] ?? '-'); ?></td>
                               <td class="px-4 py-2"><?php echo htmlspecialchars($room['kategori'] ?? '-'); ?></td>
-                              <td class="px-4 py-2 text-center 
-                                 <?php 
-                                       // Add the class based on status value
-                                       if ($room['status'] == 'Selesai') {
-                                          echo 'text-green-500 font-semibold';
-                                       } elseif ($room['status'] == 'Belum di baca') {
-                                          echo 'text-red-500 font-semibold';
-                                       } elseif ($room['status'] == 'Diproses') {
-                                          echo 'text-yellow-500 font-semibold';
-                                       }
-                                 ?>">
-                                 <?php echo htmlspecialchars($room['status']); ?>
-                              </td>                              
-                              <td class="px-4 py-2"><?php echo htmlspecialchars($room['isi_feedback'] ?? '-'); ?></td>
-                              <td class="px-4 py-2 w-40">
-                                 <?php 
-                                 if (!empty($room['tanggal_feedback'])) {
-                                    $tanggal_feedback = date_create($room['tanggal_feedback']);
-                                    $tanggal_feedback_indonesia = date_format($tanggal_feedback, "j") . " " . 
-                                                                  $bulan[(int)date_format($tanggal_feedback, "m")] . " " . 
-                                                                  date_format($tanggal_feedback, "Y");
-                                    echo $tanggal_feedback_indonesia;
-                                 } else {
-                                    echo '-';
-                                 }
-                                 ?>
-                              </td>
-
                            </tr>
                         <?php endforeach; ?>
                      <?php endif; ?>
@@ -240,7 +192,7 @@ if (isset($_SESSION['toast_message'])) {
 <!-- Modal untuk Balasan -->
 <div id="feedbackModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 flex justify-center items-center">
    <div class="bg-white rounded-lg w-1/2 p-6">
-      <h2 class="text-xl font-semibold mb-4">Balasan untuk Kritik dan Saran</h2>
+      <h2 class="text-xl font-medium mb-4">Balasan untuk Kritik dan Saran</h2>
       <form action="../../function/admin/kritik-saran/edit-kritik-saran.php" method="POST">
          <input type="hidden" name="id" id="id"> <!-- Untuk menyimpan ID kritik-saran yang akan dibalas -->
          <div class="mb-4">
