@@ -299,7 +299,7 @@ if (isset($_SESSION['toast_message'])) {
          <!-- Form Fields -->
          <div class="mb-4">
             <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
-            <input type="text" id="room_name" name="name" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <input type="text" id="room_name" name="name" placeholder="Masukkan Nama Kamar" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
          </div>
          <div class="flex space-x-4 mb-4">
             <div class="flex-1">
@@ -327,7 +327,7 @@ if (isset($_SESSION['toast_message'])) {
             </div>
             <div class="flex-1">
                <label for="price" class="block text-sm font-medium text-gray-700">Harga</label>
-               <input type="number" id="price" name="price" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+               <input type="number" id="price" placeholder='Masukkan Harga' name="price" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             </div>
          </div>
          
@@ -343,7 +343,7 @@ if (isset($_SESSION['toast_message'])) {
          <!-- Description Textarea -->
          <div class="mb-4">
             <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi Kamar</label>
-            <textarea id="description" name="description" rows="4" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+            <textarea id="description" name="description" placeholder="Masukkan Deskripsi Kamar" rows="4" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
          </div>
 
          <div class="flex justify-end gap-5">

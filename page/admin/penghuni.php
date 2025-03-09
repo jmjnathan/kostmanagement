@@ -22,28 +22,55 @@ try {
    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
    $session_username = $_SESSION['username'];
-   
-   // Query untuk mengambil nama admin
    $stmt = $pdo->prepare("SELECT name FROM users WHERE username = :username");
    $stmt->execute(['username' => $session_username]);
+
    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
    $admin_name = $admin['name'] ?? 'Admin';
 
+      // Default pagination parameters
+   $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; // Default 10
+   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Default halaman 1
+   $offset = ($page - 1) * $limit;
 
-   // $name = isset($_GET['name']) ? $_GET['name'] : '';   
+      // Ambil parameter filter dari query string
+      $name = isset($_GET['name']) ? $_GET['name'] : '';   
 
-   // Query untuk mengambil data kritik dan saran
-   $sql = 
-   "SELECT 
-      P.id, P.room_id, R.name as no_kamar, R.type, R.ac, P.nama, P.jenis_kelamin, P.nomor_telepon, P.nomor_telepon, P.alamat_asal,
-      P.status, P.tanggal_masuk, P.tanggal_keluar, P.ktp, P.nomor_darurat, P.username, P.password, P.created_at, P.updated_at
-   FROM 
-      penghuni P
-   INNER JOIN
-      rooms R on P.room_id = R.id
-   ";
+   // Total data untuk menghitung jumlah halaman dengan filter
+   $total_sql = "SELECT COUNT(*) FROM penghuni WHERE nama LIKE :name";
+   $total_stmt = $pdo->prepare($total_sql);
+   $total_stmt->bindValue(':name', "%$name%");
+   $total_stmt->execute();
+   $total_data = $total_stmt->fetchColumn();
+   $total_pages = ceil($total_data / $limit);
+
+
+   // Query untuk data penghuni dengan filter dan pagination
+   $sql = "SELECT 
+         A.id, 
+         A.nama, 
+         A.jenis_kelamin, 
+         A.nomor_telepon, 
+         A.alamat_asal, 
+         A.status, 
+         B.name AS room_name, 
+         A.ktp, 
+         A.tanggal_masuk,  
+         A.tanggal_keluar, 
+         A.nomor_darurat
+      FROM 
+         penghuni A
+      INNER JOIN
+         rooms B ON B.id = A.room_id
+      WHERE 
+         A.nama LIKE :name
+      ORDER BY 
+         A.nama ASC 
+      LIMIT :limit OFFSET :offset";
    $stmt_rooms = $pdo->prepare($sql);
-   // $stmt_rooms->bindValue(':name', "%$name%");
+   $stmt_rooms->bindValue(':name', "%$name%");
+   $stmt_rooms->bindValue(':limit', $limit, PDO::PARAM_INT);
+   $stmt_rooms->bindValue(':offset', $offset, PDO::PARAM_INT);
    $stmt_rooms->execute();
    $rooms = $stmt_rooms->fetchAll(PDO::FETCH_ASSOC);
 
@@ -52,7 +79,7 @@ try {
    exit();
 }
 ?>
-<!-- Toast Fungsi -->
+
 <?php
 session_start();
 if (isset($_SESSION['toast_message'])) {
@@ -64,6 +91,7 @@ if (isset($_SESSION['toast_message'])) {
     unset($_SESSION['toast_message']); // Hapus pesan setelah ditampilkan
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -82,10 +110,18 @@ if (isset($_SESSION['toast_message'])) {
    body {
       font-family: 'Poppins', sans-serif;
    }
-</style>
+   /* Menambahkan z-index pada modal dan tombol */
+   #room-modal {
+      z-index: 1050; /* Atur modal agar berada di atas */
+   }
+   #room-modal-edit{
+      z-index: 1050; /* Atur modal agar berada di atas */
+   }
+   #close-modal-cancel {
+      z-index: 1060; /* Pastikan tombol Batal berada di atas modal */
+   }
 
-<style>
-    #toast {
+   #toast {
       visibility: hidden; /* Awalnya tersembunyi */
       min-width: 250px;
       background-color: #28a745; /* Warna hijau */
@@ -100,6 +136,7 @@ if (isset($_SESSION['toast_message'])) {
       font-size: 17px; /* Ukuran font */
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
     }
+
 </style>
 
 <!-- Sidebar -->
@@ -112,25 +149,31 @@ if (isset($_SESSION['toast_message'])) {
    </div>
    <nav>
       <ul class="space-y-4">
-            <li><a href="dashboard-admin.php" class="block px-4 py-2 rounded-md text-white font-semibold bg-tr hover:text-blue-300 items-center space-x-3 "><i class="bx bx-home text-xl"></i><span>Dashboard Overview</span></a></li>
-            <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
+            <li><a href="dashboard-admin.php" class="block px-4 py-2 rounded-md text-white font-semibold bg-tr hover:text-blue-300 items-center space-x-3  "><i class="bx bx-home text-xl"></i><span>Dashboard Overview</span></a></li>
+            <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3 "><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
             <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3 shadow-lg"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
             <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
-            <li><a href="komplain.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3 "><i class="bx bx-chat text-xl"></i><span>Komplain</span></a></li>
+            <li><a href="komplain.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-chat text-xl"></i><span>Komplain</span></a></li>
             <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-semibold  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
-            <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3  "><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
+            <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-semibold text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-semibold"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
       </ul>
    </nav>
 </div>
 
+<!-- Mobile Sidebar Toggle -->
+<div class="md:hidden fixed top-4 left-4 z-50">
+   <button id="toggle-sidebar" class="bg-blue-500 text-white p-2 rounded-md shadow">
+      <i class="bx bx-menu text-xl"></i>
+   </button>
+</div>
 
 <!-- Main Content -->
 <div class="md:ml-72 flex flex-col min-h-screen">
    <!-- Navbar -->
-   <nav class="flex items-center justify-end bg-white p-4 fixed top-0 left-0 md:left-72 right-0 shadow-md z-10">
-      <div class="flex items-center space-x-4">
+   <nav class="flex items-center justify-end bg-white p-4 fixed top-0  md:left-72 right-0 shadow-md z-10">
+      <div class="flex items-center space-x-4 ">
          <!-- Profile -->
          <a href="#" class="profile">
             <img src="../../assets/logo/user.png" alt="Profile" class="h-10 w-10 rounded-full">
@@ -146,7 +189,14 @@ if (isset($_SESSION['toast_message'])) {
       <div class="bg-white rounded-lg shadow-md">
          <div class="p-6 mt-16">
             <div class="justify-between flex mb-5">
-               <h2 class="text-2xl font-semibold mb-4">Daftar Penghuni</h2>
+               <h2 class="text-2xl font-semibold mb-4">Penghuni</h2>
+               <!-- Button to open modal -->
+               <button id="open-modal" class="flex items-center justify-center gap-2 w-auto bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2 text-white font-semibold shadow">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Tambah Penghuni
+               </button>
             </div>
 
             <form action="penghuni.php" method="GET">
@@ -154,7 +204,7 @@ if (isset($_SESSION['toast_message'])) {
                <div class="mb-5 grid grid-cols-2 gap-3">
                   <div class="relative w-full">
                      <label for="name" class="block text-sm font-medium text-gray-700">Nama Penghuni</label>
-                     <input type="text" id="room_name" placeholder="Cari Nama Penghuni" name="name" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                     <input type="text" id="room_name" placeholder="Cari Nama penghuni" name="name" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                   </div>
                </div>
                <!-- Filter -->
@@ -170,7 +220,6 @@ if (isset($_SESSION['toast_message'])) {
                   <!-- Tombol Find -->
                </div>
             </form>
-
             
             <!-- Table to display rooms -->
             <div class="overflow-x-auto">
@@ -178,102 +227,61 @@ if (isset($_SESSION['toast_message'])) {
                   <thead>
                      <tr class="bg-gray-100">
                         <th class="px-4 py-2 text-left">Aksi</th>
-                        <th class="px-4 py-2 text-left">Nama</th>
-                        <th class="px-4 py-2 text-left">Nomor Kamar</th>
-                        <th class="px-4 py-2 text-left">Nomor Telepon</th>
+                        <th class="px-4 py-2 text-left">Nama Penghuni</th>
+                        <th class="px-4 py-2 text-left">No Kamar</th>
                         <th class="px-4 py-2 text-left">Jenis Kelamin</th>
-                        <th class="px-4 py-2 text-left">Alamat Asal</th>
-                        <th class="px-4 py-2 text-left">Tanggal Masuk dan Keluar</th>
-                        <th class="px-4 py-2 text-left">Durasi Sewa</th>
+                        <th class="px-4 py-2 text-center">Status</th>
+                        <th class="px-4 py-2 text-center">Tanggal Masuk</th>
+                        <th class="px-4 py-2 text-center">Tanggal Keluar</th>
                      </tr>
                   </thead>
                   <tbody>
                      <?php if (empty($rooms)): ?>
                         <tr>
-                           <td colspan="8" class="text-center py-3">No data available</td>
+                           <td colspan="5" class="text-center py-3">No data available</td>
                         </tr>
                      <?php else: ?>
                         <?php foreach ($rooms as $room): ?>
                            <tr>
-                              <td class="px-4 py-2 w-16">
-                                 <!-- Edit button in the table -->
-                                 <a href="#" class="edit-room-btn text-blue-500 hover:text-blue-700" data-id="<?= $room['id'] ?>" data-feedback="<?= htmlspecialchars($room['isi_feedback'] ?? '') ?>" data-status="<?= htmlspecialchars($room['status'] ?? '') ?>" onclick="openModal(this)">
-                                    <i class="bx bx-edit"></i>
+                              <td class="px-4 py-2">
+                                 <!-- Tombol Edit -->
+                                 <a href="#" 
+                                    class="edit-room-btn text-blue-500 hover:text-blue-700" 
+                                    data-room-id="<?= $room['id'] ?>" 
+                                    data-name="<?= htmlspecialchars($room['name']) ?>" 
+                                    data-type="<?= htmlspecialchars($room['type']) ?>" 
+                                    data-ac="<?= htmlspecialchars($room['ac']) ?>" 
+                                    data-capacity="<?= htmlspecialchars($room['capacity']) ?>" 
+                                    data-price="<?= htmlspecialchars($room['price']) ?>" 
+                                    data-status="<?= htmlspecialchars($room['status']) ?>">
+                                       <i class="bx bx-edit"></i>
                                  </a>
-                                 <a href="../../function/admin/penghuni/delete-penghuni.php?id=<?= $room['id'] ?>" class="ml-4 text-red-500 hover:text-red-700" onclick="return confirm('Apakah Anda yakin ingin menghapus penghuni?');">
-                                    <i class="bx bx-trash"></i>
+                                 <!-- Tombol Hapus -->
+                                 <a href="../../function/admin/penghuni/delete-room.php?id=<?= $room['id'] ?>" 
+                                    class="ml-4 text-red-500 hover:text-red-700" 
+                                    onclick="return confirm('Apakah Anda yakin ingin menghapus penghuni ini?');">
+                                       <i class="bx bx-trash"></i>
                                  </a>
-                              </td>
-                              <td class="px-4 py-2 w-56">
-                                 <div class="font-bold text-md"><?php echo htmlspecialchars($room['nama'] ?? '-'); ?></div>
-                                 <div class="text-sm"><?php echo htmlspecialchars($room['ktp'] ?? '-'); ?></div>
                               </td>
                               <td class="px-4 py-2">
-                                 <div class="font-bold text-md">
-                                    <?php echo htmlspecialchars($room['no_kamar']); ?>
-                                 </div>
-                                 <div class="text-sm">
-                                     <?php 
-                                 if ($room['type'] === 'km_luar') {
-                                       echo 'Kamar Mandi Luar';
-                                 } elseif ($room['type'] === 'km_dalam') {
-                                       echo 'Kamar Mandi Dalam';
-                                 } else {
-                                       echo htmlspecialchars($room['type']); // Default jika ada tipe lain
-                                 }
-                              ?>,
-                                    <?php echo htmlspecialchars($room['ac'] ?? '-'); ?>
-                                 </div>
+                                 <div class="font-bold"><?= htmlspecialchars($room['nama']) ?></div>
+                                 <div class="text-sm text-gray-600"><?= htmlspecialchars($room['nomor_telepon']) ?></div>
                               </td>
-                              <td class="px-4 py-2 w-40">
-                              <div class="font-bold text-md"><?php echo htmlspecialchars($room['nomor_telepon'] ?? '-'); ?></div>
-                                 <div class="text-sm"><?php echo htmlspecialchars($room['nomor_darurat'] ?? '-'); ?></div>
+                              <td class="px-4 py-2 ">
+                                 <?= htmlspecialchars($room['room_name']) ?>
                               </td>
                               <td class="px-4 py-2">
-                                 <?php echo htmlspecialchars($room['jenis_kelamin']); ?>
-                              </td>                              
-                              <td class="px-4 py-2 w-40">
-                                 <?php echo htmlspecialchars($room['alamat_asal']); ?>
+                                 <?= htmlspecialchars($room['jenis_kelamin']) ?>
                               </td>
-                              <td class="px-4 py-2 w-44">
-                                 <div class="font-bold text-md">
-                                    <?php 
-                                    // Mengubah format tanggal masuk
-                                    if (!empty($room['tanggal_masuk'])) {
-                                       $tanggal_masuk = date_create($room['tanggal_masuk']);
-                                       echo date_format($tanggal_masuk, 'j F Y'); // Contoh format: 12 Januari 2024
-                                    } else {
-                                       echo '-';
-                                    }
-                                    ?>
-                                 </div>
-                                 <div class="text-sm">
-                                    <?php 
-                                    // Mengubah format tanggal keluar
-                                    if (!empty($room['tanggal_keluar'])) {
-                                       $tanggal_keluar = date_create($room['tanggal_keluar']);
-                                       echo date_format($tanggal_keluar, 'j F Y'); // Contoh format: 12 Januari 2024
-                                    } else {
-                                       echo '-';
-                                    }
-                                    ?>
-                                 </div>
+                              <td class="px-4 py-2">
+                                 <?= htmlspecialchars($room['status']) ?>
                               </td>
-                              <td class="px-4 py-2 w-40">
-                                 <?php
-                                    // Menghitung durasi sewa jika kedua tanggal ada
-                                    if (!empty($room['tanggal_masuk']) && !empty($room['tanggal_keluar'])) {
-                                       $tanggal_masuk = date_create($room['tanggal_masuk']);
-                                       $tanggal_keluar = date_create($room['tanggal_keluar']);
-                                       $diff = date_diff($tanggal_masuk, $tanggal_keluar); // Menghitung selisih tanggal
-                                       echo "<span class='text-md'>Sewa: " . $diff->days . " Hari</span>"; // Menampilkan durasi dalam hari
-                                    } else {
-                                       echo '-';
-                                    }
-                                 ?>
+                              <td class="px-4 py-2 text-center">
+                                 <?= date('d-m-Y', strtotime($room['tanggal_masuk'])) ?>
                               </td>
-
-
+                              <td class="px-4 py-2 text-center">
+                                 <?= date('d-m-Y', strtotime($room['tanggal_keluar'])) ?>
+                              </td>
                            </tr>
                         <?php endforeach; ?>
                      <?php endif; ?>
@@ -285,6 +293,191 @@ if (isset($_SESSION['toast_message'])) {
    </div>
 </div>
 
+<!-- Modal ADD-->
+<div id="room-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
+   <div class="bg-white rounded-lg p-6 shadow-md w-2/3">
+      <div class="mb-4">
+         <h2 class="text-xl font-semibold">Tambah Penghuni</h2>
+         <!-- Close Modal Icon -->
+         <button id="close-modal-icon" class="text-red-500 absolute top-2 right-2">
+            <i class="bx bx-x text-3xl"></i>
+         </button>
+      </div>
+      <form action="../../function/admin/penghuni/add-penghuni.php" method="POST">
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="nama" class="block text-sm font-medium text-gray-700">Nama Penghuni</label>
+               <input type="text" id="nama" name="nama" placeholder="Masukkan Nama penghuni" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+            <div class="flex-1">
+               <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+               <select id="jenis_kelamin" name="jenis_kelamin" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+                  <option value="">-- Pilih Jenis Kelamin --</option>
+                  <option value="Laki-laki">Laki-Laki</option>
+                  <option value="Perempuan">Perempuan</option>
+               </select>
+            </div>
+         </div>
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="ktp" class="block text-sm font-medium text-gray-700">NIK</label>
+               <input type="text" id="ktp" name="ktp" placeholder="Masukkan NIK" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+            <div class="flex-1">
+               <label for="alamat_asal" class="block text-sm font-medium text-gray-700">Alamat Asal</label>
+               <input type="text" id="alamat_asal" name="alamat_asal" placeholder="Masukkan Alamat Asal" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+         </div>
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="nomor_telepon" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+               <input type="text" id="nomor_telepon" name="nomor_telepon" placeholder="Masukkan Nomor Telepon" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+            <div class="flex-1">
+               <label for="nomor_darurat" class="block text-sm font-medium text-gray-700">Nomor Telepon Darurat</label>
+               <input type="text" id="nomor_darurat" name="nomor_darurat" placeholder="Masukkan Nomor Telepon Darurat" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+         </div>
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="room_id" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
+               <select name="room_id" id="room_id" class="mt-1 p-2 border rounded w-full">
+                  <option value="">-- Pilih Kamar --</option>
+                  <?php
+                  try {
+                     $pdo = new PDO("mysql:host=localhost;dbname=kos_management", "root", "");
+                     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                     $sql = "SELECT id, name FROM rooms WHERE status = '1' ORDER BY name ASC";
+                     $stmt = $pdo->prepare($sql);
+                     $stmt->execute();
+                     while ($room = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        echo '<option value="' . htmlspecialchars($room['id']) . '">' . htmlspecialchars($room['name']) . '</option>';
+                     }
+                  } catch (PDOException $e) {
+                     echo '<option value="">Error: ' . htmlspecialchars($e->getMessage()) . '</option>';
+                  }
+                  ?>
+               </select>
+            </div>
+            <div class="flex-1">
+               <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+               <select id="status" name="status" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+                  <option value="">-- Pilih Status --</option>
+                  <option value="active">Active</option>
+                  <option value="non-active">Non Active</option>
+               </select>
+            </div>
+         </div>
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
+               <input type="date" id="tanggal_masuk" name="tanggal_masuk" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+         </div>
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+               <input type="text" id="username" name="username" placeholder="Masukkan Username" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+            <div class="flex-1">
+               <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+               <div class="relative">
+                  <input type="text" id="password" name="password" value="123456789" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+                  <button type="button" onclick="generatePassword()" class="absolute right-2 top-2 text-sm text-blue-500 hover:text-blue-700">Generate</button>
+               </div>
+            </div>
+         </div>
+         <div class="flex justify-end gap-5">
+            <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Tambah</button>
+         </div>
+      </form>
+
+   </div>
+</div>
+<!-- Modal ADD-->
+
+<!-- Modal Edit -->
+<div id="room-modal-edit" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 shadow-md w-2/3">
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold">Edit penghuni</h2>
+            <!-- Close Modal Icon -->
+            <button id="close-modal-icon" class="text-red-500 absolute top-2 right-2">
+                <i class="bx bx-x text-3xl"></i>
+            </button>
+        </div>
+        <!-- Form untuk Edit penghuni -->
+        <form action="../../function/admin/penghuni/edit-room.php?id=<?php echo $room['id']; ?>" method="POST">
+            <input type="hidden" name="id" value="<?php echo $room['id']; ?>">
+
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">Nama penghuni</label>
+                <input type="text" id="room_name" name="name" value="<?php echo htmlspecialchars($room['name']); ?>"
+                    class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div class="flex space-x-4 mb-4">
+                <div class="flex-1">
+                    <label for="type" class="block text-sm font-medium text-gray-700">Jenis penghuni</label>
+                    <select id="type" name="room_type"
+                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="km_luar" <?php echo ($room['type'] === 'km_luar') ? 'selected' : ''; ?>>penghuni Mandi Luar</option>
+                        <option value="km_dalam" <?php echo ($room['type'] === 'km_dalam') ? 'selected' : ''; ?>>penghuni Mandi Dalam</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="ac" class="block text-sm font-medium text-gray-700">AC</label>
+                    <select id="ac" name="ac"
+                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="AC" <?php echo ($room['ac'] === 'AC') ? 'selected' : ''; ?>>AC</option>
+                        <option value="Non-Ac" <?php echo ($room['ac'] === 'Non-Ac') ? 'selected' : ''; ?>>Non-Ac</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex space-x-4 mb-4">
+                <div class="flex-1">
+                    <label for="capacity" class="block text-sm font-medium text-gray-700">Kapasitas</label>
+                    <select id="capacity" name="capacity"
+                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="1" <?php echo ($room['capacity'] == 1) ? 'selected' : ''; ?>>1 orang</option>
+                        <option value="2" <?php echo ($room['capacity'] == 2) ? 'selected' : ''; ?>>2 orang</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="price" class="block text-sm font-medium text-gray-700">Harga</label>
+                    <input type="number" id="price" name="price" value="<?php echo htmlspecialchars($room['price']); ?>"
+                        class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select id="status" name="status"
+                    class="mt-1 py-3 px-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="1" <?php echo ($room['status'] == 1) ? 'selected' : ''; ?>>Tersedia</option>
+                    <option value="2" <?php echo ($room['status'] == 2) ? 'selected' : ''; ?>>Sedang Diperbaiki</option>
+                    <option value="3" <?php echo ($room['status'] == 3) ? 'selected' : ''; ?>>Terisi</option>
+                </select>
+            </div>
+
+            <!-- Deskripsi penghuni -->
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi penghuni</label>
+                <textarea id="description" name="description" rows="4"
+                    class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"><?php echo htmlspecialchars($room['description']); ?></textarea>
+            </div>
+
+            <div class="flex justify-end gap-5">
+               <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Edit</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Modal Edit -->
+
+
 
 <div id="toast"></div>
 
@@ -293,29 +486,91 @@ if (isset($_SESSION['toast_message'])) {
 </html>
 
 
+<!-- Modal EDIT-->
+
+
 <script>
-   // Fungsi untuk membuka modal dan mengisi data
-   function openModal(button) {
-   var id = button.getAttribute('data-id');
-   var feedback = button.getAttribute('data-feedback');
-   var status = button.getAttribute('data-status');
 
-   // Perbaikan akses ke input hidden
-   document.getElementById('id').value = id;
-   document.getElementById('isi_feedback').value = feedback;
-   document.getElementById('status').value = status;
-
-   // Tampilkan modal
-   document.getElementById('feedbackModal').classList.remove('hidden');
-}
-
-   // Fungsi untuk menutup modal
-   function closeModal() {
-      document.getElementById('feedbackModal').classList.add('hidden');
+   function changeLimit() {
+      const limit = document.getElementById('limit').value;
+      window.location.href = `?limit=${limit}&page=1`; // Reset ke halaman 1 saat jumlah data berubah
    }
 
+   // Toggle Sidebar for mobile
+   document.getElementById('toggle-sidebar').addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+   });
+   function generatePassword() {
+        document.getElementById('password').value = '123456789';
+    }
+
+   // Open and Close Modal
+// Open and Close Modal
+// Open and Close Modal
+const closeModalButton = document.getElementById('close-modal-icon');
+const closeModalCancelButton = document.getElementById('close-modal-cancel'); 
+const modalEdit = document.getElementById('room-modal-edit');  // Pastikan modal yang benar
+
+// Tombol Batal untuk menutup modal
+closeModalCancelButton.addEventListener('click', function() {
+   modalEdit.classList.add('hidden');  // Pastikan menambahkan class 'hidden' pada modal yang tepat
+   document.getElementById('sidebar').classList.remove('hidden');  // Menampilkan kembali sidebar jika diperlukan
+   document.querySelector('nav').classList.remove('hidden');  // Menampilkan kembali navbar jika diperlukan
+});
+
+// Menutup modal menggunakan tombol close (X)
+closeModalButton.addEventListener('click', function() {
+   modalEdit.classList.add('hidden');
+   document.getElementById('sidebar').classList.remove('hidden');
+   document.querySelector('nav').classList.remove('hidden');
+});
+</script>
+<script>
+// Open and close Add Room Modal
+document.getElementById('open-modal').addEventListener('click', function() {
+   document.getElementById('room-modal').classList.remove('hidden');
+});
+
+// Open and close Edit Room Modal
+const editRoomButtons = document.querySelectorAll('.edit-room-btn');
+editRoomButtons.forEach(button => {
+   button.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      // Get data attributes from the clicked button
+      const roomId = this.getAttribute('data-room-id');
+      const roomName = this.getAttribute('data-name');
+      const roomType = this.getAttribute('data-type');
+      const roomAc = this.getAttribute('data-ac');
+      const roomCapacity = this.getAttribute('data-capacity');
+      const roomPrice = this.getAttribute('data-price');
+      const roomStatus = this.getAttribute('data-status');
+
+      // Set the values in the modal
+      document.getElementById('room_name').value = roomName;
+      document.getElementById('type').value = roomType;
+      document.getElementById('ac').value = roomAc;
+      document.getElementById('capacity').value = roomCapacity;
+      document.getElementById('price').value = roomPrice;
+      document.getElementById('status').value = roomStatus;
+
+      // Show the edit modal
+      document.getElementById('room-modal-edit').classList.remove('hidden');
+   });
+});
+
+// Close modal functions
+document.getElementById('close-modal-icon').addEventListener('click', function() {
+   document.getElementById('room-modal').classList.add('hidden');
+});
+
+document.getElementById('close-modal-cancel').addEventListener('click', function() {
+   document.getElementById('room-modal').classList.add('hidden');
+});
+
 // Fungsi Toast Notification
-   function showToast(message) {
+function showToast(message) {
         var toast = document.getElementById("toast");
         toast.innerHTML = message;
         toast.style.visibility = "visible";
@@ -323,5 +578,7 @@ if (isset($_SESSION['toast_message'])) {
             toast.style.visibility = "hidden";
         }, 3000); // Toast akan menghilang setelah 3 detik
     }
+
 </script>
+
 
