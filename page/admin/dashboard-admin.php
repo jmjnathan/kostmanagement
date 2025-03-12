@@ -54,6 +54,23 @@
          $pendingPaymentsQuery = $pdo->query("SELECT COUNT(*) as pending_payments FROM pembayaran WHERE status = 'pending'");
          $pendingPayments = $pendingPaymentsQuery->fetch(PDO::FETCH_ASSOC)['pending_payments'] ?? 0;
          
+         // Query untuk yg belum bayar 
+
+         $month_year = date('Y-m'); // Ambil bulan dan tahun saat ini dalam format YYYY-MM
+
+         $belumBayar = $pdo->prepare("SELECT COUNT(*) AS total_belum_bayar
+                                    FROM penghuni B
+                                    INNER JOIN rooms C ON B.room_id = C.id
+                                    LEFT JOIN pembayaran A ON B.id = A.penghuni_id 
+                                    AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
+                                    WHERE A.penghuni_id IS NULL");
+
+         $belumBayar->bindValue(':month_year', $month_year);
+         $belumBayar->execute();
+
+         $totalBelumBayar = $belumBayar->fetch(PDO::FETCH_ASSOC)['total_belum_bayar'] ?? 0;
+
+
          // Tangkap filter bulan-tahun dari GET request
          $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : '';
 
@@ -124,6 +141,12 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
             <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
             <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
+            <li>
+               <a href="belum-bayar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3">
+                  <i class="bx bx-time-five text-xl"></i>
+                  <span>Belum Bayar</span>
+               </a>
+            </li>
             <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
@@ -175,13 +198,15 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                </div>
             <!-- Pending Payments -->
             <div class="bg-red-500 rounded-lg shadow-md p-6">
+               <a href="belum-bayar.php" class="flex items-center space-x-4">
                   <div class="flex items-center space-x-4">
                      <i class="bx bx-wallet text-3xl text-white"></i>
                      <div>
                         <h2 class="text-lg text-white md:text-xl font-medium">Belum Bayar</h2>
-                        <p class="mt-2 text-white"><?php echo htmlspecialchars($pendingPayments) . ' Transaksi'; ?></p>
+                        <p class="mt-2 text-white"><?php echo htmlspecialchars($totalBelumBayar) . ' Orang'; ?></p>
                      </div>
                   </div>
+               </a>
             </div>
 
             <div class="bg-orange-500 rounded-lg shadow-md p-6">
