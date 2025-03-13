@@ -187,8 +187,28 @@ try {
                                           ?>
                                        </td>                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['deskripsi']); ?></td>
                                         <td class="px-4 py-2"><?php echo htmlspecialchars($request['kategori']); ?></td>
-                                        <td class="px-4 py-2 text-center <?php echo ($request['status'] === 'Selesai' ? 'text-green-500' : 'text-yellow-500'); ?>">
-                                            <?php echo htmlspecialchars($request['status']); ?>
+                                        <td class="<?php 
+                                            // Tentukan teks berdasarkan status
+                                            if ($request['status'] === 'completed') {
+                                                echo 'text-green-500 font-medium text-center'; // Class untuk 'Aktif'
+                                            } elseif ($request['status'] === 'pending') {
+                                                echo 'text-red-500 font-medium text-center'; // Class untuk 'Tidak Aktif'
+                                            } elseif ($request['status'] === 'in_progress') {
+                                                echo 'text-yellow-500 font-medium text-center'; // Class untuk 'Tidak Aktif'
+                                            } 
+                                        ?>">
+                                            <?php
+                                            // Tampilkan teks berdasarkan status
+                                            if ($request['status'] === 'completed') {
+                                                echo 'Selesai';
+                                            } elseif ($request['status'] === 'pending') {
+                                                echo 'Menunggu Pengecekan';
+                                            } elseif ($request['status'] === 'in_progress') {
+                                                echo 'Diproses';
+                                            }else {
+                                                echo htmlspecialchars($request['active']); // Default jika tidak cocok
+                                            }
+                                            ?>
                                         </td>
                                         
                                     </tr>
@@ -202,10 +222,74 @@ try {
     </div>
 </div>
 
+<!-- Modal untuk melihat dan mengupdate status pengajuan -->
+<div id="maintenanceModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
+        <h2 class="text-2xl font-semibold mb-4">Detail Pengajuan Maintenance</h2>
+        <form id="editStatusForm" action="../../function/admin/maintenance/edit-maintenance.php" method="POST">        '
+        <input type="hidden" id="maintenanceId" name="id">
+        <div class="mb-4">
+            <label class="block text-gray-700">Nama Penghuni:</label>
+            <p id="modalNamaPenghuni" class="font-semibold"></p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700">Nomor Kamar:</label>
+            <p id="modalNamaKamar" class="font-semibold"></p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700">Tanggal Pengajuan:</label>
+            <p id="modalTanggal" class="font-semibold"></p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700">Deskripsi:</label>
+            <p id="modalDeskripsi" class="font-semibold"></p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700">Kategori:</label>
+            <p id="modalKategori" class="font-semibold"></p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700">Status:</label>
+            <select id="status" name="status" class="border rounded px-3 py-2 w-full">
+                <option value="pending">Pending</option>
+                <option value="in_progress">Diproses</option>
+                <option value="completed">Selesai</option>
+            </select>
+        </div>
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded">Batal</button>
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function openModal(request) {
         console.log(request); // Tampilkan data untuk debugging
         // Logika untuk membuka modal dan menampilkan detail pengajuan
+    }
+
+    let currentRequestId;
+    
+    function openModal(request) {
+    console.log(request); // Debugging, pastikan request berisi data yang benar
+    document.getElementById('modalNamaPenghuni').innerText = request.nama_penghuni;
+    document.getElementById('modalNamaKamar').innerText = request.nama_kamar;
+    document.getElementById('modalTanggal').innerText = request.tanggal_pengajuan;
+    document.getElementById('modalDeskripsi').innerText = request.deskripsi;
+    document.getElementById('modalKategori').innerText = request.kategori;
+    document.getElementById('status').value = request.status;
+    
+    // Tambahkan ID ke input hidden
+    document.getElementById('maintenanceId').value = request.id;
+
+    document.getElementById('maintenanceModal').classList.remove('hidden');
+}
+
+
+    function closeModal() {
+        document.getElementById('maintenanceModal').classList.add('hidden');
     }
 </script>
 

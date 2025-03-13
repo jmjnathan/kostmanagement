@@ -186,6 +186,7 @@ if (isset($_SESSION['toast_message'])) {
                                 <th class="px-4 py-2 text-left">Nama Penyewa</th>
                                 <th class="px-4 py-2 text-left">Nomor Telepon</th>
                                 <th class="px-4 py-2 text-left">Lama Tunggakan</th>
+                                <th class="px-4 py-2 text-left">Hubungi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -201,7 +202,18 @@ if (isset($_SESSION['toast_message'])) {
                                           <div class="text-sm text-gray-600"><?= htmlspecialchars($tenant['nomor_kamar']) ?></div>
                                        </td>                                         
                                        <td class="px-4 py-2"><?php echo htmlspecialchars($tenant['penghuni_nomor_telepon']); ?></td>
-                                       <td class="px-4 py-2 text-red-500 font-semibold"><?= $tenant['lama_hari'] . ' hari (' . $tenant['lama_bulan'] . ' bulan)'; ?></td>                                    </tr>
+                                       <td class="px-4 py-2 text-red-500 font-semibold"><?= $tenant['lama_hari'] . ' hari (' . $tenant['lama_bulan'] . ' bulan)'; ?></td>          
+                                       <td class="px-4 py-2">
+                                          <?php 
+                                             // Ubah format nomor telepon dari 08... menjadi +628...
+                                             $nomor_wa = preg_replace('/^08/', '+628', htmlspecialchars($tenant['penghuni_nomor_telepon'])); 
+                                          ?>
+                                          <a href="https://wa.me/<?= $nomor_wa ?>" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md shadow">
+                                             <i class="bx bxl-whatsapp"></i> Hubungi
+                                          </a>
+                                       </td>
+                      
+                                    </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>

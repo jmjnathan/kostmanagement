@@ -1,5 +1,13 @@
 <?php
-// Koneksi PDO ke database
+session_start();
+
+// Pastikan hanya admin yang bisa mengakses
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Akses ditolak']);
+    exit();
+}
+
 $host = 'localhost';
 $dbname = 'kos_management';
 $username = 'root';
@@ -8,43 +16,36 @@ $password = '';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-    exit();
-}
 
-// Jika terdapat `GET` ID untuk menampilkan data maintenance tertentu
-if (isset($_GET['id'])) {
-    $request_id = $_GET['id'];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = $_POST['id'] ?? null;
+        $status = $_POST['status'] ?? null; // Pastikan sesuai dengan request dari frontend
 
-    // Ambil data maintenance berdasarkan ID
-    $stmt = $pdo->prepare("SELECT * FROM maintenance WHERE request_id = :request_id");
-    $stmt->execute(['request_id' => $request_id]);
-    $maintenance = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$id || !$status) {
+            echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap']);
+            exit();
+        }
 
-    if (!$maintenance) {
-        echo "Maintenance request not found.";
+        if ($status === 'approved') {
+            $stmt = $pdo->prepare("UPDATE maintenance SET status = :status WHERE id = :id");
+        } else {
+            $stmt = $pdo->prepare("UPDATE maintenance SET status = :status WHERE id = :id");
+        }
+
+        $stmt->execute([
+            'id' => $id,
+            'status' => $status,
+        ]);
+
+        echo json_encode(['status' => 'success', 'message' => 'Status berhasil diperbarui']);
+        header('Location: ../../../page/admin/maintenance.php');
+        exit();
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Metode tidak valid']);
         exit();
     }
+} catch (PDOException $e) {
+    echo json_encode(['status' => 'error', 'message' => 'Kesalahan: ' . $e->getMessage()]);
+    exit();
 }
 ?>
-
-<?php
-$stmt = $pdo->query("SELECT * FROM maintenance");
-$maintenances = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($maintenances as $maintenance) {
-    echo "<tr>";
-    echo "<td>{$maintenance['request_id']}</td>";
-    echo "<td>{$maintenance['room_id']}</td>";
-    echo "<td>{$maintenance['description']}</td>";
-    echo "<td>{$maintenance['status']}</td>";
-    echo "<td>{$maintenance['requested_by']}</td>";
-    echo "<td>{$maintenance['created_at']}</td>";
-    echo "<td>";
-    include 'path_to_modal_code.php'; // Ganti dengan file modal di atas
-    echo "</td>";
-    echo "</tr>";
-}
-?>
-

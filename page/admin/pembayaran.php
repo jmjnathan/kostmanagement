@@ -221,8 +221,9 @@ if (isset($_SESSION['toast_message'])) {
 
 
                <div class="flex items-center justify-end mb-5 gap-2">
-                  <a href="../../function/admin/pembayaran/export_pdf.php" target="_blank" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow">
-                     <i class="fa fa-file-pdf"></i> Export PDF
+                  <a href="../../function/admin/pembayaran/export_excel.php" target="_blank" 
+                     class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow">
+                     <i class="fa fa-file-excel"></i> Export Excel
                   </a>
                   <!-- Tombol Find -->
                   <button type="submit" class="flex items-center justify-center gap-2 w-32 bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2 text-white font-medium shadow">

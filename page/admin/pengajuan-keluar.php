@@ -244,7 +244,7 @@ $pdo->exec($update_room_sql);
             
             <div class="flex-1">
                 <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                <select id="status" name="action" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <select id="status" name="status" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     <option value="">-- Pilih Status --</option>
                     <option value="rejected">Tolak</option>
                     <option value="approved">Terima</option>
