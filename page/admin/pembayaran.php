@@ -101,6 +101,7 @@ if (isset($_SESSION['toast_message'])) {
    <script src="https://cdn.tailwindcss.com"></script>
    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
    <title>KosKozie</title>
    <link rel="icon" type="image/png" class="rounded-full" href="../../assets/logo/Kozie.png">
 </head>
@@ -153,8 +154,15 @@ if (isset($_SESSION['toast_message'])) {
             <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
             <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
             <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  shadow-lg items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
+            <li>
+               <a href="belum-bayar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3">
+                  <i class="bx bx-time-five text-xl"></i>
+                  <span>Belum Bayar</span>
+               </a>
+            </li>
             <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
+            <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
             <!-- <li><a href="pengguna.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-group text-xl"></i><span>Pengguna</span></a></li>s -->
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
@@ -189,10 +197,10 @@ if (isset($_SESSION['toast_message'])) {
       <div class="bg-white rounded-lg shadow-md">
          <div class="p-6 mt-16">
             <div class="justify-between flex mb-5">
-               <h2 class="text-2xl font-medium mb-4">Laporan Pembayaran</h2>   
+               <h2 class="text-2xl font-semibold mb-4">Laporan Pembayaran</h2>   
             </div>
 
-            <form action="kamar.php" method="GET">
+            <form action="pembayaran.php" method="GET">
             <div class="mb-5 grid grid-cols-4 gap-3">
 
             <!-- Filter -->
@@ -212,7 +220,10 @@ if (isset($_SESSION['toast_message'])) {
             <!-- End Filter -->
 
 
-               <div class="flex items-center justify-end mb-5">
+               <div class="flex items-center justify-end mb-5 gap-2">
+                  <a href="../../function/admin/pembayaran/export_pdf.php" target="_blank" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow">
+                     <i class="fa fa-file-pdf"></i> Export PDF
+                  </a>
                   <!-- Tombol Find -->
                   <button type="submit" class="flex items-center justify-center gap-2 w-32 bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2 text-white font-medium shadow">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -220,6 +231,8 @@ if (isset($_SESSION['toast_message'])) {
                      </svg>
                      Cari
                   </button>
+                  
+
                   <!-- Tombol Find -->
                </div>
             </form>
@@ -231,10 +244,11 @@ if (isset($_SESSION['toast_message'])) {
                   <thead>
                      <tr class="bg-gray-100">
                         <th class="px-4 py-2 text-left">Nama Penyewa</th>
-                        <th class="px-4 py-2 text-left">Status Pembayaran</th>
-                        <th class="px-4 py-2 text-right">Nominal Dibayar</th>
-                        <th class="px-4 py-2 text-center">Metode Pembayaran</th>
-                        <th class="px-4 py-2 text-center">Tanggal Bayar</th>
+                        <th class="px-4 py-2 text-left">Status</th>
+                        <th class="px-4 py-2 text-right">Nominal</th>
+                        <th class="px-4 py-2 text-center">Metode</th>
+                        <th class="px-4 py-2 text-left">Tanggal</th>
+                        <th class="px-4 py-2 text-left">Keterangan</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -251,7 +265,12 @@ if (isset($_SESSION['toast_message'])) {
                                  <?php echo 'Rp ' . number_format($bayar['jumlah'], 0, ',', '.'); ?>
                               </td>
                               <td class="px-4 py-2 text-center"><?php echo htmlspecialchars($bayar['metode']); ?></td>
-                              <td class="px-4 py-2 text-right"><?php echo htmlspecialchars($bayar['created_at']); ?></td>
+                              <td class="px-4 py-2">
+                                          <?php 
+                                          echo date_format(date_create($bayar['created_at']), 'd M Y'); 
+                                          ?>
+                              </td>       
+                              <td class="px-4 py-2 text-left"><?php echo htmlspecialchars($bayar['keterangan']); ?></td>                    
                            </tr>
 
                         <?php endforeach; ?>

@@ -54,6 +54,23 @@
          $pendingPaymentsQuery = $pdo->query("SELECT COUNT(*) as pending_payments FROM pembayaran WHERE status = 'pending'");
          $pendingPayments = $pendingPaymentsQuery->fetch(PDO::FETCH_ASSOC)['pending_payments'] ?? 0;
          
+         // Query untuk yg belum bayar 
+
+         $month_year = date('Y-m'); // Ambil bulan dan tahun saat ini dalam format YYYY-MM
+
+         $belumBayar = $pdo->prepare("SELECT COUNT(*) AS total_belum_bayar
+                                    FROM penghuni B
+                                    INNER JOIN rooms C ON B.room_id = C.id
+                                    LEFT JOIN pembayaran A ON B.id = A.penghuni_id 
+                                    AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
+                                    WHERE A.penghuni_id IS NULL");
+
+         $belumBayar->bindValue(':month_year', $month_year);
+         $belumBayar->execute();
+
+         $totalBelumBayar = $belumBayar->fetch(PDO::FETCH_ASSOC)['total_belum_bayar'] ?? 0;
+
+
          // Tangkap filter bulan-tahun dari GET request
          $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : '';
 
@@ -91,6 +108,33 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       ?>
 
+<?php
+date_default_timezone_set('Asia/Jakarta');
+
+// Array bulan dalam bahasa Indonesia
+$bulan = [
+    'January' => 'Januari',
+    'February' => 'Februari',
+    'March' => 'Maret',
+    'April' => 'April',
+    'May' => 'Mei',
+    'June' => 'Juni',
+    'July' => 'Juli',
+    'August' => 'Agustus',
+    'September' => 'September',
+    'October' => 'Oktober',
+    'November' => 'November',
+    'December' => 'Desember'
+];
+
+// Ambil bulan dan tahun saat ini
+$bulan_inggris = date('F');
+$tahun = date('Y');
+
+// Konversi bulan ke bahasa Indonesia
+$bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
+?>
+
 <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -99,6 +143,7 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
          <script src="https://cdn.tailwindcss.com"></script>        
          <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
          <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
          <title>KosKozie</title>
          <link rel="icon" type="image/png" class="rounded-full" href="../../assets/logo/Kozie.png">
       </head>
@@ -124,8 +169,15 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
             <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
             <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
+            <li>
+               <a href="belum-bayar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3">
+                  <i class="bx bx-time-five text-xl"></i>
+                  <span>Belum Bayar</span>
+               </a>
+            </li>
             <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
+            <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
             <!-- <li><a href="pengguna.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-group text-xl"></i><span>Pengguna</span></a></li> -->
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
@@ -175,13 +227,15 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                </div>
             <!-- Pending Payments -->
             <div class="bg-red-500 rounded-lg shadow-md p-6">
+               <a href="belum-bayar.php" class="flex items-center space-x-4">
                   <div class="flex items-center space-x-4">
                      <i class="bx bx-wallet text-3xl text-white"></i>
                      <div>
                         <h2 class="text-lg text-white md:text-xl font-medium">Belum Bayar</h2>
-                        <p class="mt-2 text-white"><?php echo htmlspecialchars($pendingPayments) . ' Transaksi'; ?></p>
+                        <p class="mt-2 text-white"><?php echo htmlspecialchars($totalBelumBayar) . ' Orang'; ?></p>
                      </div>
                   </div>
+               </a>
             </div>
 
             <div class="bg-orange-500 rounded-lg shadow-md p-6">
@@ -216,7 +270,7 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                <div class="flex items-center space-x-4">
                   <i class="bx bx-money text-3xl text-white"></i>
                   <div>
-                     <h2 class="text-lg text-white md:text-xl font-medium">Uang Masuk</h2>
+                     <h2 class="text-lg text-white md:text-xl font-medium">Uang Masuk Bulan <?php echo ucfirst($bulan_tahun); ?></h2>
                      <p class="mt-2 text-white">
                         Rp <?php echo number_format($totalIncome, 0, ',', '.'); ?>
                      </p>
@@ -226,33 +280,6 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
          </div>
 
 <!-- Table Riwayat Pembayaran -->
-<!-- Table Riwayat Pembayaran -->
-<?php
-date_default_timezone_set('Asia/Jakarta');
-
-// Array bulan dalam bahasa Indonesia
-$bulan = [
-    'January' => 'Januari',
-    'February' => 'Februari',
-    'March' => 'Maret',
-    'April' => 'April',
-    'May' => 'Mei',
-    'June' => 'Juni',
-    'July' => 'Juli',
-    'August' => 'Agustus',
-    'September' => 'September',
-    'October' => 'Oktober',
-    'November' => 'November',
-    'December' => 'Desember'
-];
-
-// Ambil bulan dan tahun saat ini
-$bulan_inggris = date('F');
-$tahun = date('Y');
-
-// Konversi bulan ke bahasa Indonesia
-$bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
-?>
    <div class="bg-white p-4 rounded-lg shadow-md">
       <h2 class="text-lg md:text-xl font-semibold mb-4">
          Riwayat Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
@@ -280,9 +307,13 @@ $bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
                         <tr class="border-b">
                             <td class="px-4 py-2"><?= htmlspecialchars($payment['nama_penghuni']) ?></td>
                             <td class="px-4 py-2"><?= htmlspecialchars($payment['nomor_kamar']) ?></td>
-                            <td class="px-4 py-2"><?= date('d-m-Y', strtotime($payment['tanggal_bayar'])) ?></td>
-                            <td class="px-4 py-2">Rp <?= number_format($payment['jumlah'], 0, ',', '.') ?></td>
-                            <td class="px-4 py-2"><?= htmlspecialchars($payment['status']) ?></td>
+                            <td class="px-4 py-2">
+                              <?php 
+                                 echo date_format(date_create($payment['tanggal_bayar']), 'd M Y'); 
+                              ?>                              
+                           </td>                            
+                           <td class="px-4 py-2">Rp <?= number_format($payment['jumlah'], 0, ',', '.') ?></td>
+                            <td class="px-4 py-2 text-green-500 font-bold"><?= htmlspecialchars($payment['status']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

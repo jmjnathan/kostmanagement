@@ -31,10 +31,11 @@
          $price = $_POST['price'];
          $status = $_POST['status'];
          $description = $_POST['description'];
+         $active = $_POST['active'];
          
          // Query untuk menambahkan kamar baru ke dalam database
-         $stmt = $pdo->prepare("INSERT INTO rooms (name, type, ac, capacity, price, status, description) 
-                                 VALUES (:name, :type, :ac, :capacity, :price, :status,:description)");
+         $stmt = $pdo->prepare("INSERT INTO rooms (name, type, ac, capacity, price, status, description, active) 
+                                 VALUES (:name, :type, :ac, :capacity, :price, :status,:description, :active)");
          $stmt->execute([
                'name' => $name,
                'type' => $room_type,
@@ -42,7 +43,8 @@
                'capacity' => $capacity,
                'price' => $price,
                'status' => $status,
-               'description' => $description
+               'description' => $description,
+               'active' => $active
          ]);
 
          $_SESSION['toast_message'] = "Data berhasil ditambahkan!";

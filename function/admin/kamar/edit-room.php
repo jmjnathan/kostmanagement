@@ -33,6 +33,7 @@ try {
         $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
         $status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING);
         $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_STRING);
+        $active = filter_input(INPUT_POST, 'active', FILTER_SANITIZE_STRING);
 
         // Pastikan room_id valid
         if (!$room_id) {
@@ -50,28 +51,33 @@ try {
             exit();
         }
 
-        // UPDATE DATA KAMAR
-        $stmt = $pdo->prepare("UPDATE rooms SET 
+        // Jika description kosong, gunakan NULL di database
+        $update_query = "UPDATE rooms SET 
             name = :name, 
             type = :type, 
             ac = :ac, 
             capacity = :capacity, 
             price = :price, 
             status = :status, 
-            description = :description,
-            updated_at = NOW() 
-            WHERE id = :room_id");
+            active = :active,
+            updated_at = NOW()";
 
-        $stmt->execute([
+        $params = [
             'name' => $name,
             'type' => $room_type,
             'ac' => $ac,
             'capacity' => $capacity,
             'price' => $price,
             'status' => $status,
-            'description' => $description,
-            'room_id' => $room_id
-        ]);
+            'room_id' => $room_id,
+            'active' => $active
+        ];
+        // Tambahkan WHERE clause
+        $update_query .= " WHERE id = :room_id";
+
+        // Jalankan query
+        $stmt = $pdo->prepare($update_query);
+        $stmt->execute($params);
 
         // Periksa apakah data berhasil diperbarui
         if ($stmt->rowCount() > 0) {
