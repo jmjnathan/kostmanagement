@@ -56,7 +56,6 @@ try {
          B.name AS room_name, 
          A.ktp, 
          A.tanggal_masuk,  
-         A.tanggal_keluar, 
          A.nomor_darurat
       FROM 
          penghuni A
@@ -101,6 +100,7 @@ if (isset($_SESSION['toast_message'])) {
    <script src="https://cdn.tailwindcss.com"></script>
    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
    <title>KosKozie</title>
    <link rel="icon" type="image/png" class="rounded-full" href="../../assets/logo/Kozie.png">
 </head>
@@ -160,6 +160,7 @@ if (isset($_SESSION['toast_message'])) {
                </a>
             </li><li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
+            <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
             <!-- <li><a href="pengguna.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-group text-xl"></i><span>Pengguna</span></a></li> -->
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
@@ -235,8 +236,8 @@ if (isset($_SESSION['toast_message'])) {
                         <th class="px-4 py-2 text-left">Nama Penghuni</th>
                         <th class="px-4 py-2 text-left">No Kamar</th>
                         <th class="px-4 py-2 text-left">Jenis Kelamin</th>
-                        <th class="px-4 py-2 text-center">Status</th>
-                        <th class="px-4 py-2 text-center">Tanggal Masuk</th>
+                        <th class="px-4 py-2 text-left">Status</th>
+                        <th class="px-4 py-2 text-left">Tanggal Masuk</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -280,12 +281,28 @@ if (isset($_SESSION['toast_message'])) {
                               <td class="px-4 py-2">
                                  <?= htmlspecialchars($room['jenis_kelamin']) ?>
                               </td>
+                              <td class="<?php 
+                                          if ($room['status'] === 'active') {
+                                             echo 'text-green-500 font-medium text-left'; 
+                                          } elseif ($room['status'] === 'inactive') {
+                                             echo 'text-red-500 font-medium text-left'; 
+                                          } 
+                                       ?>">
+                                          <?php
+                                          if ($room['status'] === 'active') {
+                                             echo 'Aktif';
+                                          } elseif ($room['status'] === 'inactive') {
+                                             echo 'Non-aktif';
+                                          } else {
+                                             echo 'Status Tidak Diketahui'; // Tambahan jika status tidak sesuai
+                                          }
+                                          ?>
+                                       </td>
                               <td class="px-4 py-2">
-                                 <?= htmlspecialchars($room['status']) ?>
-                              </td>
-                              <td class="px-4 py-2 text-center">
-                                 <?= date('d-m-Y', strtotime($room['tanggal_masuk'])) ?>
-                              </td>
+                                 <?php 
+                                    echo date_format(date_create($room['tanggal_masuk']), 'd M Y'); 
+                                 ?>
+                              </td> 
                            </tr>
                         <?php endforeach; ?>
                      <?php endif; ?>

@@ -32,18 +32,30 @@ try {
     // Query untuk mengambil data pengajuan maintenance
     $sql = 
     "SELECT 
-            A.id, A.id_penghuni, B.nama nama_penghuni, A.id_kamar, C.name nama_kamar,
-            A.tanggal_pengajuan, A.deskripsi, A.kategori, A.status
-        FROM
-            maintenance A
-        INNER JOIN
-            penghuni B ON A.id_penghuni = B.id
-        INNER JOIN
-            rooms C ON A.id_kamar = C.id;"
+      A. *,
+      B.nama nama_penghuni, B.room_id, C.name nomor_kamar
+      FROM pengajuan_keluar A 
+      INNER JOIN penghuni B ON B.id = A.penghuni_id
+      INNER JOIN rooms C ON B.room_id = C.id;"
     ;
     $stmt_requests = $pdo->prepare($sql);
     $stmt_requests->execute();
     $requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
+
+    // Hapus penghuni jika tanggal keluar sudah lewat
+   $delete_sql = "DELETE FROM penghuni WHERE id IN (
+      SELECT penghuni_id FROM pengajuan_keluar WHERE tanggal_rencana_keluar < CURDATE() AND status = 'approved'
+   )";
+
+   $update_room_sql = "UPDATE rooms SET status = 'tersedia' WHERE id IN (
+      SELECT room_id FROM penghuni WHERE id IN (
+         SELECT penghuni_id FROM pengajuan_keluar WHERE tanggal_rencana_keluar < CURDATE() AND status = 'approved'
+      )
+   )";
+
+$pdo->exec($delete_sql);
+$pdo->exec($update_room_sql);
+
 
 } catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage();
@@ -118,9 +130,9 @@ try {
                   <span>Belum Bayar</span>
                </a>
             </li>
-            <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3 shadow-lg"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
+            <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
-            <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
+            <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3 shadow-lg"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
             <!-- <li><a href="pengguna.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-group text-xl"></i><span>Pengguna</span></a></li> -->
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
@@ -149,7 +161,7 @@ try {
         <div class="bg-white rounded-lg shadow-md">
             <div class="p-6">
                 <div class="justify-between flex mb-5">
-                    <h2 class="text-2xl font-semibold mb-4">Pengajuan Pemeliharaan</h2>
+                    <h2 class="text-2xl font-semibold mb-4">Pengajuan Keluar Kos</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-auto">
@@ -157,11 +169,10 @@ try {
                             <tr class="bg-gray-100">
                             <th class="px-4 py-2 text-center">Aksi</th>
                                 <th class="px-4 py-2 text-left">Nama Penghuni</th>
-                                <th class="px-4 py-2 text-left">Tanggal Pengajuan</th>
-                                <th class="px-4 py-2 text-left">Deskripsi Masalah</th>
-                                <th class="px-4 py-2 text-left">Kategori</th>
-                                <th class="px-4 py-2 text-center">Status</th>
-                                
+                                <th class="px-4 py-2 text-left">Pengajuan</th>
+                                <th class="px-4 py-2 text-left">Keluar</th>
+                                <th class="px-4 py-2 text-left">Alasan</th>
+                                <th class="px-4 py-2 text-left">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -172,25 +183,47 @@ try {
                             <?php else: ?>
                                 <?php foreach ($requests as $request): ?>
                                     <tr>
-                                        <td class="px-4 py-2 text-center">
-                                            <a href="#" class="text-blue-500 hover:text-blue-700" onclick="openModal(<?php echo htmlspecialchars(json_encode($request)); ?>)">
-                                                <i class="bx bx-edit"></i>                                            
-                                            </a>
-                                        </td>
+                                       <td class="px-4 py-2 text-center">
+                                          <a href="#" class="text-blue-500 hover:text-blue-700" onclick="openModal(<?php echo htmlspecialchars(json_encode($request)); ?>)">
+                                             <i class="bx bx-edit"></i>
+                                          </a>
+                                       </td>
                                         <td class="px-4 py-2">
                                           <div class="font-bold"><?= htmlspecialchars($request['nama_penghuni']) ?></div>
-                                          <div class="text-sm text-gray-600"><?= htmlspecialchars($request['nama_kamar']) ?></div>
-                                       </td>                                         
+                                          <div class="text-sm text-gray-600"><?= htmlspecialchars($request['nomor_kamar']) ?></div>
+                                       </td>                                        
                                        <td class="px-4 py-2">
                                           <?php 
                                           echo date_format(date_create($request['tanggal_pengajuan']), 'd M Y'); 
                                           ?>
-                                       </td>                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['deskripsi']); ?></td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['kategori']); ?></td>
-                                        <td class="px-4 py-2 text-center <?php echo ($request['status'] === 'Selesai' ? 'text-green-500' : 'text-yellow-500'); ?>">
-                                            <?php echo htmlspecialchars($request['status']); ?>
-                                        </td>
-                                        
+                                       </td>
+                                       <td class="px-4 py-2">
+                                          <?php 
+                                          echo date_format(date_create($request['tanggal_rencana_keluar']), 'd M Y'); 
+                                          ?>
+                                       </td>
+                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['alasan']); ?></td>
+                                        <td class="<?php 
+                                          if ($request['status'] === 'approved') {
+                                             echo 'text-green-500 font-medium text-left'; 
+                                          } elseif ($request['status'] === 'pending') {
+                                             echo 'text-yellow-500 font-medium text-left'; 
+                                          } elseif ($request['status'] === 'rejected') {
+                                             echo 'text-red-500 font-medium text-left'; 
+                                          } 
+                                       ?>">
+                                          <?php
+                                          if ($request['status'] === 'approved') {
+                                             echo 'Diterima';
+                                          } elseif ($request['status'] === 'pending') {
+                                             echo 'Menunggu Persetujuan';
+                                          } elseif ($request['status'] === 'rejected') {
+                                             echo 'Ditolak';
+                                          } else {
+                                             echo 'Status Tidak Diketahui'; // Tambahan jika status tidak sesuai
+                                          }
+                                          ?>
+                                       </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -202,12 +235,47 @@ try {
     </div>
 </div>
 
+<!-- Modal Approval Keluar -->
+<div id="approval-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 w-3/6 shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Setujui Pengajuan Keluar Kos</h2>
+        <form id="approval-form" method="POST" action="../../function/admin/pengajuan-keluar/edit-status.php">
+            <input type="hidden" id="request-id" name="id">
+            
+            <div class="flex-1">
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select id="status" name="action" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="">-- Pilih Status --</option>
+                    <option value="rejected">Tolak</option>
+                    <option value="approved">Terima</option>
+                </select>
+            </div>
+            <label class="block text-sm font-medium text-gray-700 mt-3">Catatan (Opsional)</label>
+            <textarea id="note" name="note" rows="3" class="w-full border rounded-md p-2 mt-2"></textarea>
+
+            <div class="flex justify-end space-x-3 mt-4">
+                <!-- Tombol Batal (Tutup Modal) -->
+                <button type="button" onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded-md">Batal</button>
+                <!-- Tombol Simpan (Submit Form) -->
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    function openModal(request) {
-        console.log(request); // Tampilkan data untuk debugging
-        // Logika untuk membuka modal dan menampilkan detail pengajuan
+   function openModal(request) {
+        document.getElementById('approval-modal').classList.remove('hidden');
+        document.getElementById('request-id').value = request.id;
+        document.getElementById('status').value = request.status;
+        document.getElementById('note').value = request.note || '';    }
+   function closeModal() {
+        document.getElementById('approval-modal').classList.add('hidden');
     }
+
 </script>
 
 </body>
+
+
 </html>

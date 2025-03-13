@@ -31,22 +31,31 @@ try {
     $admin_name = $admin['name'] ?? 'Admin';
 
     // Ambil parameter filter dari query string
-    $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : date('Y-m'); // Default to current month
+// Ambil parameter filter dari query string
+   $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : date('Y-m'); // Default bulan ini
 
-    // Query untuk mendapatkan penghuni yang belum membayar
-    $sql = "SELECT 
-                B.nama AS nama_penghuni, 
-                B.nomor_telepon AS penghuni_nomor_telepon,
-                C.name AS nomor_kamar
-            FROM penghuni B
-            INNER JOIN rooms C ON B.room_id = C.id
-            LEFT JOIN pembayaran A ON B.id = A.penghuni_id AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
-            WHERE A.penghuni_id IS NULL"; // Only select tenants without payments for the specified month
+   // Query untuk mendapatkan penghuni yang belum membayar
+   $sql = "SELECT 
+         B.nama AS nama_penghuni, 
+         B.nomor_telepon AS penghuni_nomor_telepon,
+         C.name AS nomor_kamar,
+         B.tanggal_masuk,
+         DATEDIFF(CURDATE(), B.tanggal_masuk) AS lama_hari,
+         TIMESTAMPDIFF(MONTH, B.tanggal_masuk, CURDATE()) AS lama_bulan
+      FROM penghuni B
+      INNER JOIN rooms C ON B.room_id = C.id
+      LEFT JOIN pembayaran A ON B.id = A.penghuni_id AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
+      WHERE A.penghuni_id IS NULL"; // Hanya yang belum bayar di bulan tertentu
 
-    $stmt_bayar = $pdo->prepare($sql);
-    $stmt_bayar->bindValue(':month_year', $month_year);
-    $stmt_bayar->execute();
-    $belum_bayar = $stmt_bayar->fetchAll(PDO::FETCH_ASSOC);
+   $stmt_bayar = $pdo->prepare($sql);
+   $stmt_bayar->bindValue(':month_year', $month_year);
+   $stmt_bayar->execute();
+   $belum_bayar = $stmt_bayar->fetchAll(PDO::FETCH_ASSOC);
+
+
+// 
+
+
 
 } catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage();
@@ -73,6 +82,7 @@ if (isset($_SESSION['toast_message'])) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>KosKozie</title>
     <link rel="icon" type="image/png" class="rounded-full" href="../../assets/logo/Kozie.png">
     <style>
@@ -111,13 +121,14 @@ if (isset($_SESSION['toast_message'])) {
             <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
             <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
             <li>
-               <a href="belum-bayar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3">
+               <a href="belum-bayar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3 shadow-lg">
                   <i class="bx bx-time-five text-xl"></i>
                   <span>Belum Bayar</span>
                </a>
             </li>
             <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
+            <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700 items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
         </ul>
@@ -151,22 +162,21 @@ if (isset($_SESSION['toast_message'])) {
                     <h2 class="text-2xl font-semibold mb-4">Laporan Tunggakan</h2>
                 </div>
 
-                <form action="belum_bayar.php" method="GET">
-                    <div class="mb-5 grid grid-cols-2 gap-3">
-                        <div class="relative w-full">
-                            <label for="month_year" class="block text-sm font-medium text-gray-700">Bulan & Tahun</label>
-                            <input type="month" id="month_year" name="month_year" value="<?= date('Y-m'); ?>" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-end mb-5">
-                        <button type="submit" class="flex items-center justify-center gap-2 w-32 bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2 text-white font-medium shadow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 4a7 7 0 011 13.938V21l5-5-5-5v3.062A5.975 5.975 0 0017 12a6 6 0 10-6 6c1.453 0 2.77-.48 3.939-1.281L12 17V7c0-1.343.672-2.602 1.745-3.485L14 3H11z" />
-                            </svg>
-                            Cari
-                        </button>
-                    </div>
-                </form>
+                <form action="belum-bayar.php" method="GET">
+                  <div class="mb-5 grid grid-cols-2 gap-3">
+                     <div class="relative w-full">
+                           <label for="month_year" class="block text-sm font-medium text-gray-700">Bulan & Tahun</label>
+                           <input type="month" id="month_year" name="month_year" value="<?= htmlspecialchars($month_year); ?>" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                     </div>
+                  </div>
+                  <div class="flex items-center justify-end mb-5">
+                     <button type="submit" class="flex items-center justify-center gap-2 w-32 bg-blue-500 hover:bg-blue-600 rounded-md px-4 py-2 text-white font-medium shadow">
+                           <i class="bx bx-search"></i>
+                           Cari
+                     </button>
+                  </div>
+               </form>
+
 
                 <!-- Table to display unpaid tenants -->
                 <div class="overflow-x-auto">
@@ -175,7 +185,7 @@ if (isset($_SESSION['toast_message'])) {
                             <tr class="bg-gray-100">
                                 <th class="px-4 py-2 text-left">Nama Penyewa</th>
                                 <th class="px-4 py-2 text-left">Nomor Telepon</th>
-                                <th class="px-4 py-2 text-left">Nomor Kamar</th>
+                                <th class="px-4 py-2 text-left">Lama Tunggakan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -186,10 +196,12 @@ if (isset($_SESSION['toast_message'])) {
                             <?php else: ?>
                                 <?php foreach ($belum_bayar as $tenant): ?>
                                     <tr>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($tenant['nama_penghuni']); ?></td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($tenant['penghuni_nomor_telepon']); ?></td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($tenant['nomor_kamar']); ?></td>
-                                    </tr>
+                                       <td class="px-4 py-2">
+                                          <div class="font-bold"><?= htmlspecialchars($tenant['nama_penghuni']) ?></div>
+                                          <div class="text-sm text-gray-600"><?= htmlspecialchars($tenant['nomor_kamar']) ?></div>
+                                       </td>                                         
+                                       <td class="px-4 py-2"><?php echo htmlspecialchars($tenant['penghuni_nomor_telepon']); ?></td>
+                                       <td class="px-4 py-2 text-red-500 font-semibold"><?= $tenant['lama_hari'] . ' hari (' . $tenant['lama_bulan'] . ' bulan)'; ?></td>                                    </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
@@ -213,6 +225,10 @@ if (isset($_SESSION['toast_message'])) {
             toast.style.visibility = "hidden";
         }, 3000); // Toast will disappear after 3 seconds
     }
+
+    document.getElementById("month_year").addEventListener("change", function() {
+        this.form.submit();
+    });
 </script>
 
 </body>
