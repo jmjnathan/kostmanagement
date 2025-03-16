@@ -29,7 +29,7 @@ try {
     $admin_name = $admin['name'] ?? 'Admin';
 
     // Default pagination parameters
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; // Default 10
+    $limit =  10; // Default 10
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Default halaman 1
     $offset = ($page - 1) * $limit;
 
@@ -126,6 +126,7 @@ if (isset($_SESSION['toast_message'])) {
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
             <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
+            <li><a href="peraturan.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-info-circle text-xl"></i><span>Peraturan</span></a></li>
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700 items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
         </ul>
     </nav>
@@ -287,6 +288,27 @@ if (isset($_SESSION['toast_message'])) {
                             <?php endif; ?>
                         </tbody>
                     </table>
+                     <div class="flex justify-end mt-4">
+                        <nav class="inline-flex space-x-1">
+                              <?php if ($page > 1): ?>
+                                 <a href="?page=<?= $page - 1 ?>" class="px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                                    &laquo;
+                                 </a>
+                              <?php endif; ?>
+
+                              <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                 <a href="?page=<?= $i ?>" class="px-3 py-1 <?= $i == $page ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400' ?> rounded-md">
+                                    <?= $i ?>
+                                 </a>
+                              <?php endfor; ?>
+
+                              <?php if ($page < $total_pages): ?>
+                                 <a href="?page=<?= $page + 1 ?>" class="px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                                    &raquo;
+                                 </a>
+                              <?php endif; ?>
+                        </nav>
+                     </div>
                 </div>
             </div>
         </div>

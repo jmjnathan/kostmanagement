@@ -3,13 +3,13 @@ session_start();
 
 // Cek apakah pengguna sudah login
 if (!isset($_SESSION['username'])) {
-    header('Location: index.php'); // Jika belum login, arahkan ke halaman login
+    header('Location: index.php');
     exit();
 }
 
-// Cek role pengguna, jika bukan admin, alihkan ke halaman lain
+// Cek role pengguna
 if ($_SESSION['role'] !== 'admin') {
-    header('Location: dashboard-user.php'); // Jika bukan admin, arahkan ke dashboard user atau halaman lain
+    header('Location: dashboard-user.php');
     exit();
 }
 
@@ -26,37 +26,42 @@ try {
     $session_username = $_SESSION['username'];
     $stmt = $pdo->prepare("SELECT name FROM users WHERE username = :username");
     $stmt->execute(['username' => $session_username]);
-
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     $admin_name = $admin['name'] ?? 'Admin';
 
     // Ambil parameter filter dari query string
-// Ambil parameter filter dari query string
-   $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : date('Y-m'); // Default bulan ini
+    $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : date('Y-m');
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = 10; // Jumlah data per halaman
+    $offset = ($page - 1) * $limit;
 
-   // Query untuk mendapatkan penghuni yang belum membayar
-   $sql = "SELECT 
-         B.nama AS nama_penghuni, 
-         B.nomor_telepon AS penghuni_nomor_telepon,
-         C.name AS nomor_kamar,
-         B.tanggal_masuk,
-         DATEDIFF(CURDATE(), B.tanggal_masuk) AS lama_hari,
-         TIMESTAMPDIFF(MONTH, B.tanggal_masuk, CURDATE()) AS lama_bulan
-      FROM penghuni B
-      INNER JOIN rooms C ON B.room_id = C.id
-      LEFT JOIN pembayaran A ON B.id = A.penghuni_id AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
-      WHERE A.penghuni_id IS NULL"; // Hanya yang belum bayar di bulan tertentu
+    // Query untuk mendapatkan total data
+    $count_sql = "SELECT COUNT(*) FROM penghuni B
+                  LEFT JOIN pembayaran A ON B.id = A.penghuni_id AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
+                  WHERE A.penghuni_id IS NULL";
+    $stmt_count = $pdo->prepare($count_sql);
+    $stmt_count->bindValue(':month_year', $month_year);
+    $stmt_count->execute();
+    $total_records = $stmt_count->fetchColumn();
+    $total_pages = ceil($total_records / $limit);
 
-   $stmt_bayar = $pdo->prepare($sql);
-   $stmt_bayar->bindValue(':month_year', $month_year);
-   $stmt_bayar->execute();
-   $belum_bayar = $stmt_bayar->fetchAll(PDO::FETCH_ASSOC);
-
-
-// 
-
-
-
+    // Query untuk mendapatkan penghuni yang belum membayar dengan pagination
+    $sql = "SELECT B.nama AS nama_penghuni, B.nomor_telepon AS penghuni_nomor_telepon,
+                   C.name AS nomor_kamar, B.tanggal_masuk,
+                   DATEDIFF(CURDATE(), B.tanggal_masuk) AS lama_hari,
+                   TIMESTAMPDIFF(MONTH, B.tanggal_masuk, CURDATE()) AS lama_bulan
+            FROM penghuni B
+            INNER JOIN rooms C ON B.room_id = C.id
+            LEFT JOIN pembayaran A ON B.id = A.penghuni_id AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
+            WHERE A.penghuni_id IS NULL
+            LIMIT :limit OFFSET :offset";
+    
+    $stmt_bayar = $pdo->prepare($sql);
+    $stmt_bayar->bindValue(':month_year', $month_year);
+    $stmt_bayar->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt_bayar->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt_bayar->execute();
+    $belum_bayar = $stmt_bayar->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage();
     exit();
@@ -130,6 +135,7 @@ if (isset($_SESSION['toast_message'])) {
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
             <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
+            <li><a href="peraturan.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-info-circle text-xl"></i><span>Peraturan</span></a></li>
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700 items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
         </ul>
     </nav>
@@ -202,7 +208,7 @@ if (isset($_SESSION['toast_message'])) {
                                           <div class="text-sm text-gray-600"><?= htmlspecialchars($tenant['nomor_kamar']) ?></div>
                                        </td>                                         
                                        <td class="px-4 py-2"><?php echo htmlspecialchars($tenant['penghuni_nomor_telepon']); ?></td>
-                                       <td class="px-4 py-2 text-red-500 font-semibold"><?= $tenant['lama_hari'] . ' hari (' . $tenant['lama_bulan'] . ' bulan)'; ?></td>          
+                                       <td class="px-4 py-2 text-red-500 font-semibold"><?= $tenant['lama_bulan'] . ' bulan'; ?></td>          
                                        <td class="px-4 py-2">
                                           <?php 
                                              // Ubah format nomor telepon dari 08... menjadi +628...
@@ -218,6 +224,22 @@ if (isset($_SESSION['toast_message'])) {
                             <?php endif; ?>
                         </tbody>
                     </table>
+
+                    <div class="flex justify-end mt-4">
+                        <nav class="inline-flex space-x-1">
+                            <?php if ($page > 1): ?>
+                                <a href="?month_year=<?= $month_year ?>&page=<?= $page - 1 ?>" class="px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">&laquo;</a>
+                            <?php endif; ?>
+
+                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                <a href="?month_year=<?= $month_year ?>&page=<?= $i ?>" class="px-3 py-1 <?= $i == $page ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400' ?> rounded-md"> <?= $i ?> </a>
+                            <?php endfor; ?>
+
+                            <?php if ($page < $total_pages): ?>
+                                <a href="?month_year=<?= $month_year ?>&page=<?= $page + 1 ?>" class="px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">&raquo;</a>
+                            <?php endif; ?>
+                        </nav>
+                    </div>
                 </div>
 
             </div>

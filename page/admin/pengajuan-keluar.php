@@ -135,6 +135,7 @@ $pdo->exec($update_room_sql);
             <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3 shadow-lg"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
             <!-- <li><a href="pengguna.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-group text-xl"></i><span>Pengguna</span></a></li> -->
+            <li><a href="peraturan.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-info-circle text-xl"></i><span>Peraturan</span></a></li>
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
       </ul>
    </nav>
@@ -208,8 +209,6 @@ $pdo->exec($update_room_sql);
                                              echo 'text-green-500 font-medium text-left'; 
                                           } elseif ($request['status'] === 'pending') {
                                              echo 'text-yellow-500 font-medium text-left'; 
-                                          } elseif ($request['status'] === 'rejected') {
-                                             echo 'text-red-500 font-medium text-left'; 
                                           } 
                                        ?>">
                                           <?php
@@ -217,8 +216,6 @@ $pdo->exec($update_room_sql);
                                              echo 'Diterima';
                                           } elseif ($request['status'] === 'pending') {
                                              echo 'Menunggu Persetujuan';
-                                          } elseif ($request['status'] === 'rejected') {
-                                             echo 'Ditolak';
                                           } else {
                                              echo 'Status Tidak Diketahui'; // Tambahan jika status tidak sesuai
                                           }
@@ -246,7 +243,6 @@ $pdo->exec($update_room_sql);
                 <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                 <select id="status" name="status" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     <option value="">-- Pilih Status --</option>
-                    <option value="rejected">Tolak</option>
                     <option value="approved">Terima</option>
                 </select>
             </div>

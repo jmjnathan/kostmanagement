@@ -96,8 +96,27 @@
          $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
          $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
          $stmt->execute();
+         $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+         $month_year = isset($_GET['month_year']) ? $_GET['month_year'] : date('Y-m'); // Default bulan ini
+
+   // Query untuk mendapatkan penghuni yang belum membayar
+         $sql = "SELECT 
+               B.nama AS nama_penghuni, 
+               B.nomor_telepon AS penghuni_nomor_telepon,
+               C.name AS nomor_kamar,
+               B.tanggal_masuk,
+               DATEDIFF(CURDATE(), B.tanggal_masuk) AS lama_hari,
+               TIMESTAMPDIFF(MONTH, B.tanggal_masuk, CURDATE()) AS lama_bulan
+            FROM penghuni B
+            INNER JOIN rooms C ON B.room_id = C.id
+            LEFT JOIN pembayaran A ON B.id = A.penghuni_id AND DATE_FORMAT(A.tanggal_bayar, '%Y-%m') = :month_year
+            WHERE A.penghuni_id IS NULL"; // Hanya yang belum bayar di bulan tertentu
+
+         $stmt_bayar = $pdo->prepare($sql);
+         $stmt_bayar->bindValue(':month_year', $month_year);
+         $stmt_bayar->execute();
+         $belum_bayar = $stmt_bayar->fetchAll(PDO::FETCH_ASSOC);
 
 
          
@@ -179,7 +198,9 @@ $bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium  text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
             <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
             <li><a href="kritik-saran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-message-detail text-xl"></i><span>Kritik dan Saran</span></a></li>
+            <li><a href="peraturan.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-info-circle text-xl"></i><span>Peraturan</span></a></li>
             <!-- <li><a href="pengguna.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300  items-center space-x-3"><i class="bx bx-group text-xl"></i><span>Pengguna</span></a></li> -->
+
             <li><a href="../../logout.php" class="block px-4 py-2 rounded-md text-red-500 hover:text-red-700  items-center space-x-3 font-medium"><i class="bx bx-log-out text-xl"></i><span>Logout</span></a></li>
          </ul>
          </nav>
@@ -280,7 +301,7 @@ $bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
          </div>
 
 <!-- Table Riwayat Pembayaran -->
-   <div class="bg-white p-4 rounded-lg shadow-md">
+   <div class="bg-white p-4 rounded-lg shadow-md mb-5">
       <h2 class="text-lg md:text-xl font-semibold mb-4">
          Riwayat Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
       </h2>
@@ -320,7 +341,53 @@ $bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
             </tbody>
         </table>
     </div>
+     
 </div>
+
+<!-- Tabel Belum Bayar -->
+<div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-lg md:text-xl font-semibold mb-4">
+         Daftar Tunggakan Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
+      </h2>
+    <div class="overflow-x-auto">
+        <table class="min-w-full table-auto">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left font-medium">Nama Penghuni</th>
+                    <th class="px-4 py-2 text-left font-medium">Lama</th>
+                    <th class="px-4 py-2 text-left font-medium">Hubungi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($belum_bayar)): ?>
+                    <tr>
+                        <td colspan="5" class="px-4 py-2 text-center text-gray-500">
+                            Data tidak ditemukan
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($belum_bayar as $belum_bayar): ?>
+                        <tr class="border-b">
+                        <td class="px-4 py-2">
+                           <div class="font-bold"><?= htmlspecialchars($belum_bayar['nama_penghuni']) ?></div>
+                           <div class="text-sm text-gray-600"><?= htmlspecialchars($belum_bayar['nomor_kamar']) ?></div>
+                        </td>   
+                        <td class="px-4 py-2 text-red-500 font-semibold"><?= $belum_bayar['lama_hari'] . ' hari (' . $belum_bayar['lama_bulan'] . ' bulan)'; ?></td>          
+                           
+                        <td class="px-4 py-2">
+                                          <?php 
+                                             // Ubah format nomor telepon dari 08... menjadi +628...
+                                             $nomor_wa = preg_replace('/^08/', '+628', htmlspecialchars($belum_bayar['penghuni_nomor_telepon'])); 
+                                          ?>
+                                          <a href="https://wa.me/<?= $nomor_wa ?>" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md shadow">
+                                             <i class="bx bxl-whatsapp"></i> Hubungi
+                                          </a>
+                                       </td>                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 
 
       <script>
