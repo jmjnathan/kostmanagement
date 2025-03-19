@@ -346,105 +346,88 @@ if (isset($_SESSION['toast_message'])) {
             <i class="bx bx-x text-3xl"></i>
          </button>
       </div>
-      <form action="../../function/admin/penghuni/add-penghuni.php" method="POST">
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="nama" class="block text-sm font-medium text-gray-700">Nama Penghuni</label>
-               <input type="text" id="nama" name="nama" placeholder="Masukkan Nama penghuni" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
-            <div class="flex-1">
-               <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-               <select id="jenis_kelamin" name="jenis_kelamin" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-                  <option value="">-- Pilih Jenis Kelamin --</option>
-                  <option value="Laki-laki">Laki-Laki</option>
-                  <option value="Perempuan">Perempuan</option>
-               </select>
-            </div>
-         </div>
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="ktp" class="block text-sm font-medium text-gray-700">NIK</label>
-               <input
-                  type="text"
-                  id="ktp"
-                  name="ktp"
-                  placeholder="Masukkan NIK"
-                  maxlength="16"
-                  class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md"
-                  oninput="validateNIK(this)"
-               />
-               <p id="error-msg" class="text-red-500 text-sm mt-1 hidden">NIK harus 16 angka!</p>
-               </div>
-            <div class="flex-1">
-               <label for="alamat_asal" class="block text-sm font-medium text-gray-700">Alamat Asal</label>
-               <input type="text" id="alamat_asal" name="alamat_asal" placeholder="Masukkan Alamat Asal" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
-         </div>
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="nomor_telepon" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
-               <input type="text" id="nomor_telepon" name="nomor_telepon" placeholder="Masukkan Nomor Telepon" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
-            <div class="flex-1">
-               <label for="nomor_darurat" class="block text-sm font-medium text-gray-700">Nomor Telepon Darurat</label>
-               <input type="text" id="nomor_darurat" name="nomor_darurat" placeholder="Masukkan Nomor Telepon Darurat" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
-         </div>
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="room_id" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
-               <select name="room_id" id="room_id" class="mt-1 p-2 border rounded w-full">
-                  <option value="">-- Pilih Kamar --</option>
-                  <?php
-                  try {
-                     $pdo = new PDO("mysql:host=localhost;dbname=kos_management", "root", "");
-                     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                     $sql = "SELECT id, name FROM rooms WHERE status = '1' ORDER BY name ASC";
-                     $stmt = $pdo->prepare($sql);
-                     $stmt->execute();
-                     while ($room = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      <form id="add-penghuni-form" action="../../function/admin/penghuni/add-penghuni.php" method="POST">
+    <div class="flex space-x-4 mb-4">
+        <div class="flex-1">
+            <label for="nama" class="block text-sm font-medium text-gray-700">Nama Penghuni</label>
+            <input type="text" id="nama" name="nama" placeholder="Masukkan Nama penghuni" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+        </div>
+        <div class="flex-1">
+            <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+            <select id="jenis_kelamin" name="jenis_kelamin" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+                <option value="">-- Pilih Jenis Kelamin --</option>
+                <option value="Laki-laki">Laki-Laki</option>
+                <option value="Perempuan">Perempuan</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="flex space-x-4 mb-4">
+        <div class="flex-1">
+            <label for="ktp" class="block text-sm font-medium text-gray-700">NIK</label>
+            <input type="text" id="ktp" name="ktp" placeholder="Masukkan NIK" maxlength="16" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md" oninput="validateNIK(this)">
+            <p id="error-msg" class="text-red-500 text-sm mt-1 hidden">NIK harus 16 angka!</p>
+        </div>
+        <div class="flex-1">
+            <label for="alamat_asal" class="block text-sm font-medium text-gray-700">Alamat Asal</label>
+            <input type="text" id="alamat_asal" name="alamat_asal" placeholder="Masukkan Alamat Asal" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+        </div>
+    </div>
+
+    <div class="flex space-x-4 mb-4">
+        <div class="flex-1">
+            <label for="nomor_telepon" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+            <input type="text" id="nomor_telepon" name="nomor_telepon" placeholder="Masukkan Nomor Telepon" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+        </div>
+        <div class="flex-1">
+            <label for="nomor_darurat" class="block text-sm font-medium text-gray-700">Nomor Telepon Darurat (Opsional)</label>
+            <input type="text" id="nomor_darurat" name="nomor_darurat" placeholder="Masukkan Nomor Telepon Darurat" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+        </div>
+    </div>
+
+    <div class="flex space-x-4 mb-4">
+        <div class="flex-1">
+            <label for="room_id" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
+            <select name="room_id" id="room_id" class="mt-1 p-2 border rounded w-full">
+                <option value="">-- Pilih Kamar --</option>
+                <?php
+                try {
+                    $pdo = new PDO("mysql:host=localhost;dbname=kos_management", "root", "");
+                    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $sql = "SELECT id, name FROM rooms WHERE status = '1' ORDER BY name ASC";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute();
+                    while ($room = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         echo '<option value="' . htmlspecialchars($room['id']) . '">' . htmlspecialchars($room['name']) . '</option>';
-                     }
-                  } catch (PDOException $e) {
-                     echo '<option value="">Error: ' . htmlspecialchars($e->getMessage()) . '</option>';
-                  }
-                  ?>
-               </select>
-            </div>
-            <div class="flex-1">
-               <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-               <select id="status" name="status" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-                  <option value="">-- Pilih Status --</option>
-                  <option value="active">Active</option>
-                  <option value="non-active">Non Active</option>
-               </select>
-            </div>
-         </div>
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
-               <input type="date" id="tanggal_masuk" name="tanggal_masuk" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
-         </div>
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-               <input type="text" id="username" name="username" placeholder="Masukkan Username" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
-            <div class="flex-1">
-               <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-               <div class="relative">
-                  <input type="text" id="password" name="password" value="123456789" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-                  <button type="button" onclick="generatePassword()" class="absolute right-2 top-2 text-sm text-blue-500 hover:text-blue-700">Generate</button>
-               </div>
-            </div>
-         </div>
-         <div class="flex justify-end gap-5">
-            <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Tambah</button>
-         </div>
-      </form>
-   </div>
+                    }
+                } catch (PDOException $e) {
+                    echo '<option value="">Error: ' . htmlspecialchars($e->getMessage()) . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div class="flex-1">
+            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+            <select id="status" name="status" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+                <option value="">-- Pilih Status --</option>
+                <option value="active">Active</option>
+                <option value="non-active">Non Active</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="flex space-x-4 mb-4">
+        <div class="flex-1">
+            <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
+            <input type="date" id="tanggal_masuk" name="tanggal_masuk" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-5">
+        <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Tambah</button>
+    </div>
+</form>   </div>
 </div>
 <!-- Modal ADD-->
 
@@ -529,19 +512,47 @@ if (isset($_SESSION['toast_message'])) {
 <!-- Modal EDIT-->
 <script>
 
-function validateNIK(input) {
-    const errorMsg = document.getElementById("error-msg");
-    const nikValue = input.value;
+document.getElementById("add-penghuni-form").addEventListener("submit", function(event) {
+        let isValid = true;
+        const requiredFields = ["nama", "jenis_kelamin", "ktp", "alamat_asal", "nomor_telepon", "room_id", "status", "tanggal_masuk"];
+        
+        requiredFields.forEach(field => {
+            const input = document.getElementById(field);
+            if (!input.value.trim()) {
+                isValid = false;
+                input.classList.add("border-red-500");
+            } else {
+                input.classList.remove("border-red-500");
+            }
+        });
 
-    // Hanya izinkan angka
-    input.value = nikValue.replace(/\D/g, "");
+        // Validasi NIK harus 16 angka
+        const nikInput = document.getElementById("ktp");
+        if (nikInput.value.length !== 16) {
+            isValid = false;
+            document.getElementById("error-msg").classList.remove("hidden");
+        } else {
+            document.getElementById("error-msg").classList.add("hidden");
+        }
 
-    if (nikValue.length !== 16) {
-      errorMsg.classList.remove("hidden"); // Tampilkan pesan error
-    } else {
-      errorMsg.classList.add("hidden"); // Sembunyikan pesan error
+        if (!isValid) {
+            event.preventDefault(); // Hentikan form jika ada error
+            alert("Harap isi semua field yang diperlukan dengan benar!");
+        }
+    });
+
+    function validateNIK(input) {
+        const errorMsg = document.getElementById("error-msg");
+        const nikValue = input.value;
+
+        input.value = nikValue.replace(/\D/g, ""); // Hanya angka
+
+        if (nikValue.length !== 16) {
+            errorMsg.classList.remove("hidden");
+        } else {
+            errorMsg.classList.add("hidden");
+        }
     }
-  }
 
    function changeLimit() {
       const limit = document.getElementById('limit').value;
