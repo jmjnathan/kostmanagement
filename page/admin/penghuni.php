@@ -364,8 +364,17 @@ if (isset($_SESSION['toast_message'])) {
          <div class="flex space-x-4 mb-4">
             <div class="flex-1">
                <label for="ktp" class="block text-sm font-medium text-gray-700">NIK</label>
-               <input type="text" id="ktp" name="ktp" placeholder="Masukkan NIK" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
+               <input
+                  type="text"
+                  id="ktp"
+                  name="ktp"
+                  placeholder="Masukkan NIK"
+                  maxlength="16"
+                  class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md"
+                  oninput="validateNIK(this)"
+               />
+               <p id="error-msg" class="text-red-500 text-sm mt-1 hidden">NIK harus 16 angka!</p>
+               </div>
             <div class="flex-1">
                <label for="alamat_asal" class="block text-sm font-medium text-gray-700">Alamat Asal</label>
                <input type="text" id="alamat_asal" name="alamat_asal" placeholder="Masukkan Alamat Asal" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
@@ -519,6 +528,20 @@ if (isset($_SESSION['toast_message'])) {
 
 <!-- Modal EDIT-->
 <script>
+
+function validateNIK(input) {
+    const errorMsg = document.getElementById("error-msg");
+    const nikValue = input.value;
+
+    // Hanya izinkan angka
+    input.value = nikValue.replace(/\D/g, "");
+
+    if (nikValue.length !== 16) {
+      errorMsg.classList.remove("hidden"); // Tampilkan pesan error
+    } else {
+      errorMsg.classList.add("hidden"); // Sembunyikan pesan error
+    }
+  }
 
    function changeLimit() {
       const limit = document.getElementById('limit').value;
