@@ -65,6 +65,33 @@ $peraturan_kos = $stmt_peraturan->fetchAll(PDO::FETCH_COLUMN);
 }
 
 ?>
+<?php
+date_default_timezone_set('Asia/Jakarta');
+
+// Array bulan dalam bahasa Indonesia
+$bulan = [
+    'January' => 'Januari',
+    'February' => 'Februari',
+    'March' => 'Maret',
+    'April' => 'April',
+    'May' => 'Mei',
+    'June' => 'Juni',
+    'July' => 'Juli',
+    'August' => 'Agustus',
+    'September' => 'September',
+    'October' => 'Oktober',
+    'November' => 'November',
+    'December' => 'Desember'
+];
+
+// Ambil bulan dan tahun saat ini
+$bulan_inggris = date('F');
+$tahun = date('Y');
+
+// Konversi bulan ke bahasa Indonesia
+$bulan_tahun = $bulan[$bulan_inggris] . ' ' . $tahun;
+?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -175,7 +202,7 @@ $peraturan_kos = $stmt_peraturan->fetchAll(PDO::FETCH_COLUMN);
                 <i class='bx bx-wallet'></i>
                 <p>Pembayaran</p>
             </a>
-            <a href="riwayat-pembayaran.php" class="dashboard-card">
+            <a href="riwayat-pembayaran-user.php" class="dashboard-card">
                 <i class='bx bx-history'></i>
                 <p>Riwayat</p>
             </a>
@@ -187,10 +214,22 @@ $peraturan_kos = $stmt_peraturan->fetchAll(PDO::FETCH_COLUMN);
                 <i class='bx bx-wrench'></i>
                 <p>Maintenance</p>
             </a>
-            <a href="setting-akun.php" class="dashboard-card">
-                <i class='bx bx-user'></i>
-                <p>Akun</p>
-            </a>
+            <!-- Akun Dropdown -->
+            <div class="dashboard-card relative group">
+                <button class="flex flex-col items-center justify-center p-2 rounded-lg font-bold text-sm text-white transition-all duration-300 ease-in-out">
+                    <i class='bx bx-user text-2xl'></i>
+                    <span>Akun</span>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div class="absolute hidden group-hover:flex flex-col items-center justify-center w-40 bg-white rounded-lg shadow-lg mt-2 p-2 transition-all duration-300 ease-in-out">
+                    <a href="edit-profile.php" class="w-full px-4 py-2 text-gray-700 text-center rounded-lg hover:bg-gray-100">Edit Profile</a>
+                    <a href="ubah-password.php" class="w-full px-4 py-2 text-gray-700 text-center rounded-lg hover:bg-gray-100">Ubah Password</a>
+                </div>
+            </div>
+
+
+
             <a href="pengajuan-keluar.php" class="dashboard-card">
                 <i class='bx bx-door-open'></i>
                 <p>Pengajuan Keluar</p>
@@ -201,7 +240,7 @@ $peraturan_kos = $stmt_peraturan->fetchAll(PDO::FETCH_COLUMN);
     <!-- Table Riwayat Pembayaran -->
 <div class="dashboard-container mt-5">
     <h2 class="text-lg md:text-xl font-semibold mb-4 text-center">
-        Riwayat Pembayaran
+    Riwayat Pembayaran Bulan <?php echo ucfirst($bulan_tahun); ?>
     </h2>
     <div class="overflow-x-auto max-h-64 overflow-y-auto border rounded-lg">
         <table class="min-w-full table-auto border rounded-lg">
@@ -256,6 +295,23 @@ $peraturan_kos = $stmt_peraturan->fetchAll(PDO::FETCH_COLUMN);
 <script>
     console.log("Riwayat Pembayaran:", <?php echo json_encode($payments); ?>);
     console.log('User Id', <?php echo json_encode($user_id); ?>);
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const userMenu = document.getElementById("user-menu");
+        const dropdownMenu = document.getElementById("dropdown-menu");
+
+        userMenu.addEventListener("click", function (event) {
+            event.stopPropagation(); // Menghindari penutupan langsung saat klik
+            dropdownMenu.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!userMenu.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.add("hidden");
+            }
+        });
+    });
 </script>
 
 

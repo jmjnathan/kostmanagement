@@ -189,12 +189,12 @@ if (isset($_SESSION['toast_message'])) {
                                 <th class="px-4 py-2 text-left">Aksi</th>
                                 <th class="px-4 py-2 text-left">No Kamar</th>
                                 <th class="px-4 py-2 text-left">Jenis</th>
-                                <th class="px-4 py-2 text-left">AC</th>
                                 <th class="px-4 py-2 text-right">Kapasitas</th>
                                 <th class="px-4 py-2 text-right">Harga</th>
                                 <th class="px-4 py-2 text-left">Deskripsi</th>
                                 <th class="px-4 py-2 text-center">Status</th>
                                 <th class="px-4 py-2 text-center">Aktif</th>
+                                <th class="px-4 py-2 text-center">Foto</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -233,9 +233,8 @@ if (isset($_SESSION['toast_message'])) {
                                                 } else {
                                                     echo htmlspecialchars($room['type']); // Default jika ada tipe lain
                                                 }
-                                            ?>
+                                            ?> - <?php echo htmlspecialchars($room['ac']); ?>
                                         </td>
-                                        <td class="px-4 py-2"><?php echo htmlspecialchars($room['ac']); ?></td>
                                         <td class="px-4 py-2 text-right"><?php echo htmlspecialchars($room['capacity']); ?> orang</td>
                                         <td class="px-4 py-2 text-right">Rp.<?php echo number_format($room['price'], 0, ',', '.'); ?></td>
                                         <td class="px-4 ```php
@@ -282,6 +281,9 @@ if (isset($_SESSION['toast_message'])) {
                                             }
                                             ?>
                                         </td>
+                                        <td class="px-4 py-2 text-center">
+                                            <img src="data:image/jpeg;base64,<?php echo base64_encode($room['foto']); ?>" alt="Room Image" class="w-16 h-16 object-cover rounded-lg">
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -323,7 +325,7 @@ if (isset($_SESSION['toast_message'])) {
                 <i class="bx bx-x text-3xl"></i>
             </button>
         </div>
-        <form action="../../function/admin/kamar/add-room.php" method="POST">
+        <form action="../../function/admin/kamar/add-room.php" method="POST" enctype="multipart/form-data">
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
                 <input type="text" id="room_name" name="name" placeholder="Masukkan Nama Kamar" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -376,6 +378,10 @@ if (isset($_SESSION['toast_message'])) {
                      <option value="non-active">Non-aktif</option>
                   </select>
                </div>
+            </div>
+            <div class="mb-4">
+                <label for="foto" class="block text-sm font-medium text-gray-700">Foto Kamar</label>
+                <input type="file" id="foto" name="foto" accept="image/*" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             </div>
            
             <div class="mb-4">
