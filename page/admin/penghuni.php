@@ -423,6 +423,20 @@ if (isset($_SESSION['toast_message'])) {
         </div>
     </div>
 
+    <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+               <input type="text" id="username" name="username" placeholder="Masukkan Username" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+            <div class="flex-1">
+               <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+               <div class="relative">
+                  <input type="text" id="password" name="password" value="123456789" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+                  <button type="button" onclick="generatePassword()" class="absolute right-2 top-2 text-sm text-blue-500 hover:text-blue-700">Generate</button>
+               </div>
+            </div>
+         </div>
+
     <div class="flex justify-end gap-5">
         <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
         <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Tambah</button>
@@ -492,6 +506,20 @@ if (isset($_SESSION['toast_message'])) {
                   <option value="active">Active</option>
                   <option value="non-active">Non Active</option>
                </select>
+            </div>
+         </div>
+
+         <div class="flex space-x-4 mb-4">
+            <div class="flex-1">
+               <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+               <input type="text" id="username" name="username" placeholder="Masukkan Username" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+            </div>
+            <div class="flex-1">
+               <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+               <div class="relative">
+                  <input type="text" id="password" name="password" value="123456789" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
+                  <button type="button" onclick="generatePassword()" class="absolute right-2 top-2 text-sm text-blue-500 hover:text-blue-700">Generate</button>
+               </div>
             </div>
          </div>
 
