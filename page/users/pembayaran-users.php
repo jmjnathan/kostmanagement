@@ -121,7 +121,7 @@ try {
                 </p>
             </div>
         <?php endforeach; ?>
-        <button class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600">Bayar</button>
+       <a href="tagihan-pembayaran.php"> <button class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600">Bayar</button></a>
     </div>
 
 <script>

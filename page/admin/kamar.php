@@ -22,14 +22,15 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $session_username = $_SESSION['username'];
+    
+    // Ambil nama admin
     $stmt = $pdo->prepare("SELECT name FROM users WHERE username = :username");
     $stmt->execute(['username' => $session_username]);
-
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     $admin_name = $admin['name'] ?? 'Admin';
 
     // Default pagination parameters
-    $limit =  10; // Default 10
+    $limit = 10; // Default 10
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Default halaman 1
     $offset = ($page - 1) * $limit;
 
@@ -57,9 +58,8 @@ try {
     echo 'Connection failed: ' . $e->getMessage();
     exit();
 }
-?>
 
-<?php
+// Menampilkan pesan toast jika ada
 if (isset($_SESSION['toast_message'])) {
     echo "<script>
         window.onload = function() {
@@ -110,18 +110,13 @@ if (isset($_SESSION['toast_message'])) {
         <img src="../../assets/logo/Kozie.png" alt="Logo" class="h-20 mx-auto rounded-full">
         <h1 class="text-lg font-medium text-white mt-4 uppercase">Dashboard for Admin</h1>
     </div>
-    <nav >
+    <nav>
         <ul class="space-y-4">
             <li><a href="dashboard-admin.php" class="block px-4 py-2 rounded-md text-white font-medium bg-tr hover:text-blue-300 items-center space-x-3"><i class="bx bx-home text-xl"></i><span>Dashboard Overview</span></a></li>
             <li><a href="kamar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3 shadow-lg"><i class="bx bx-bed text-xl"></i><span>Kamar</span></a></li>
             <li><a href="penghuni.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-user text-xl"></i><span>Penghuni</span></a></li>
             <li><a href="pembayaran.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-wallet text-xl"></i><span>Pembayaran</span></a></li>
-            <li>
-               <a href="belum-bayar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3">
-                  <i class="bx bx-time-five text-xl"></i>
-                  <span>Belum Bayar</span>
-               </a>
-            </li>
+            <li><a href="belum-bayar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-time-five text-xl"></i><span>Belum Bayar</span></a></li>
             <li><a href="maintenance.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-wrench text-xl"></i><span>Maintenance</span></a></li>
             <li><a href="broadcast.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="bx bx-bell text-xl"></i><span>Broadcast Notifikasi</span></a></li>
             <li><a href="pengajuan-keluar.php" class="block px-4 py-2 rounded-md font-medium text-white hover:text-blue-300 items-center space-x-3"><i class="fa-solid fa-person-walking-arrow-right text-md"></i><span>Pengajuan Keluar Kos</span></a></li>
@@ -237,7 +232,6 @@ if (isset($_SESSION['toast_message'])) {
                                         </td>
                                         <td class="px-4 py-2 text-right"><?php echo htmlspecialchars($room['capacity']); ?> orang</td>
                                         <td class="px-4 py-2 text-right">Rp.<?php echo number_format($room['price'], 0, ',', '.'); ?></td>
-                                        <td class="px-4 ```php
                                         <td class="px-4 py-2 w-60"><?php echo htmlspecialchars($room['description']); ?></td>
                                         <td class="<?php 
                                             // Tentukan teks berdasarkan status
@@ -328,12 +322,12 @@ if (isset($_SESSION['toast_message'])) {
         <form action="../../function/admin/kamar/add-room.php" method="POST" enctype="multipart/form-data">
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamar</label>
-                <input type="text" id="room_name" name="name" placeholder="Masukkan Nama Kamar" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <input type="text" id="room_name" name="name" placeholder="Masukkan Nama Kamar" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
             </div>
             <div class="flex space-x-4 mb-4">
                 <div class="flex-1">
                     <label for="type" class="block text-sm font-medium text-gray-700">Jenis Kamar</label>
-                    <select id="type" name="room_type" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <select id="type" name="room_type" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                         <option value="">-- Pilih Jenis Kamar --</option>
                         <option value="km_luar">Kamar Mandi Luar</option>
                         <option value="km_dalam">Kamar Mandi Dalam</option>
@@ -341,7 +335,7 @@ if (isset($_SESSION['toast_message'])) {
                 </div>
                 <div class="flex-1">
                     <label for="ac" class="block text-sm font-medium text-gray-700">Fasilitas</label>
-                    <select id="ac" name="ac" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <select id="ac" name="ac" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                         <option value="">-- Pilih Jenis Fasilitas --</option>
                         <option value="AC">AC</option>
                         <option value="Non-Ac">Non-Ac</option>
@@ -350,8 +344,8 @@ if (isset($_SESSION['toast_message'])) {
             </div>
             <div class="flex space-x-4 mb-4">
                 <div class="flex-1">
-                    <label for="capacity" class="block text-sm font-medium text-gray- 700">Kapasitas</label>
-                    <select id="capacity" name="capacity" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <label for="capacity" class="block text-sm font-medium text-gray-700">Kapasitas</label>
+                    <select id="capacity" name="capacity" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                         <option value="">-- Pilih Kapasitas --</option>
                         <option value="1">1 orang</option>
                         <option value="2">2 orang</option>
@@ -359,13 +353,13 @@ if (isset($_SESSION['toast_message'])) {
                 </div>
                 <div class="flex-1">
                     <label for="price" class="block text-sm font-medium text-gray-700">Harga</label>
-                    <input type="number" id="price" placeholder='Masukkan Harga' name="price" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <input type="number" id="price" placeholder='Masukkan Harga' name="price" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                 </div>
             </div>
             <div class="flex space-x-4 mb-4">
                <div class="flex-1">
                   <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                  <select id="status" name="status" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                  <select id="status" name="status" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                      <option value="1">Tersedia</option>
                      <option value="2">Sedang Diperbaiki</option>
                      <option value="3">Terisi</option>
@@ -373,7 +367,7 @@ if (isset($_SESSION['toast_message'])) {
                </div>
                <div class="flex-1">
                   <label for="active" class="block text-sm font-medium text-gray-700">Aktif/Non-aktif</label>
-                  <select id="active" name="active" class="mt-1 py-3 px-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                  <select id="active" name="active" class="mt-1 py-3 px-4 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
                      <option value="active">Aktif</option>
                      <option value="non-active">Non-aktif</option>
                   </select>
@@ -381,12 +375,12 @@ if (isset($_SESSION['toast_message'])) {
             </div>
             <div class="mb-4">
                 <label for="foto" class="block text-sm font-medium text-gray-700">Foto Kamar</label>
-                <input type="file" id="foto" name="foto" accept="image/*" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <input type="file" id="foto" name="foto" accept="image/*" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
             </div>
            
             <div class="mb-4">
                 <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi Kamar</label>
-                <textarea id="description" name="description" placeholder="Masukkan Deskripsi Kamar" rows="4" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                <textarea id="description" name="description" placeholder="Masukkan Deskripsi Kamar" rows="4" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required></textarea>
             </div>
             <div class="flex justify-end gap-5">
                 <button type="button" id="close-modal-cancel" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Batal</button>
@@ -471,7 +465,7 @@ if (isset($_SESSION['toast_message'])) {
         </form>
     </div>
 </div>
-<!-- End Modal Edit -->
+
 <div id="toast"></div>
 
 <script>
