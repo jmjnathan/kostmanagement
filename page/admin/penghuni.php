@@ -63,7 +63,7 @@ try {
          rooms B ON B.id = A.room_id
       WHERE 
          A.nama LIKE :name
-      ORDER BY A.tanggal_masuk DESC
+      ORDER BY CAST(A.tanggal_masuk AS DATE) DESC
       LIMIT :limit OFFSET :offset";
    $stmt_rooms = $pdo->prepare($sql);
    $stmt_rooms->bindValue(':name', "%$name%");
@@ -252,17 +252,16 @@ if (isset($_SESSION['toast_message'])) {
                                  <!-- Tombol Edit -->
                                  <a href="#" 
                                     class="edit-room-btn text-blue-500 hover:text-blue-700" 
-                                    data-id="<?= $room['id'] ?>" 
+                                    data-id="<?= htmlspecialchars($room['id']) ?>" 
                                     data-name="<?= htmlspecialchars($room['nama']) ?>" 
                                     data-room-id="<?= htmlspecialchars($room['room_id']) ?>" 
                                     data-nomor-telepon="<?= htmlspecialchars($room['nomor_telepon']) ?>" 
                                     data-jenis-kelamin="<?= htmlspecialchars($room['jenis_kelamin']) ?>" 
                                     data-alamat-asal="<?= htmlspecialchars($room['alamat_asal']) ?>" 
-                                    data-status="<?= htmlspecialchars($room['status']) ?>" 
-                                    onclick="openModal(this)">
+                                    data-status="<?= htmlspecialchars($room['status']) ?>"
+                                    data-ktp="<?= htmlspecialchars($room['ktp']) ?>">
                                     <i class="bx bx-edit"></i>
                                  </a>
-
                                  <!-- Tombol Hapus -->
                                  <a href="../../function/admin/penghuni/delete-penghuni.php?id=<?= $room['id'] ?>" 
                                     class="ml-4 text-red-500 hover:text-red-700" 
@@ -470,7 +469,7 @@ if (isset($_SESSION['toast_message'])) {
                   try {
                      $pdo = new PDO("mysql:host=localhost;dbname=kos_management", "root", "");
                      $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                     $sql = "SELECT id, name FROM rooms WHERE status = '1' ORDER BY name ASC";
+                     $sql = "SELECT id, name FROM rooms ORDER BY name ASC";
                      $stmt = $pdo->prepare($sql);
                      $stmt->execute();
                      while ($room = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -487,7 +486,7 @@ if (isset($_SESSION['toast_message'])) {
          <div class="flex space-x-4 mb-4">
             <div class="flex-1">
                <label class="block text-sm font-medium text-gray-700">NIK</label>
-               <input type="text" id="edit_ktp" name="ktp" class="py-3 px-4 mt-1 block w-full border rounded-md">
+               <input type="text" id="edit_ktp" name="ktp" value="" class="py-3 px-4 mt-1 block w-full border rounded-md">
             </div>
             <div class="flex-1">
                <label class="block text-sm font-medium text-gray-700">Alamat Asal</label>
@@ -506,20 +505,6 @@ if (isset($_SESSION['toast_message'])) {
                   <option value="active">Active</option>
                   <option value="non-active">Non Active</option>
                </select>
-            </div>
-         </div>
-
-         <div class="flex space-x-4 mb-4">
-            <div class="flex-1">
-               <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-               <input type="text" id="username" name="username" placeholder="Masukkan Username" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-            </div>
-            <div class="flex-1">
-               <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-               <div class="relative">
-                  <input type="text" id="password" name="password" value="123456789" class="py-3 px-4 mt-1 block w-full border border-gray-300 rounded-md">
-                  <button type="button" onclick="generatePassword()" class="absolute right-2 top-2 text-sm text-blue-500 hover:text-blue-700">Generate</button>
-               </div>
             </div>
          </div>
 
@@ -620,44 +605,6 @@ document.getElementById('open-modal').addEventListener('click', function() {
    document.getElementById('room-modal').classList.remove('hidden');
 });
 
-// Open and close Edit Room Modal
-const editRoomButtons = document.querySelectorAll('.edit-room-btn');
-editRoomButtons.forEach(button => {
-   button.addEventListener('click', function(e) {
-      e.preventDefault();
-
-      // Get data attributes from the clicked button
-      const id = this.getAttribute('data-id');
-      const name = this.getAttribute('data-name');
-      const roomId = this.getAttribute('data-room-id');
-      const nik = this.getAttribute('data-nik');
-      const alamatAsal = this.getAttribute('data-alamat-asal');
-      const nomorTelepon = this.getAttribute('data-nomor-telepon');
-      const status = this.getAttribute('data-status');
-      
-
-      // ngeset data ke modal edit
-      document.getElementById('nama').value = name;
-      document.getElementById('room_id').value = roomId;
-      document.getElementById('nik').value = nik;
-      document.getElementById('alamat_asal').value = alamatAsal;
-      document.getElementById('nomor_telepon').value = nomorTelepon;
-      document.getElementById('status').value = status;
-
-      // Show the edit modal
-      document.getElementById('room-modal-edit').classList.remove('hidden');
-   });
-});
-
-// Close modal functions
-document.getElementById('close-modal-icon').addEventListener('click', function() {
-   document.getElementById('room-modal').classList.add('hidden');
-});
-
-document.getElementById('close-modal-cancel').addEventListener('click', function() {
-   document.getElementById('room-modal').classList.add('hidden');
-});
-
 // Fungsi Toast Notification
 function showToast(message) {
         var toast = document.getElementById("toast");
@@ -671,36 +618,36 @@ function showToast(message) {
 
     // Tampilkan Modal Edit dengan Data Penghuni
     document.addEventListener("DOMContentLoaded", function () {
-    // Event Listener untuk tombol Edit (Menggunakan Event Delegation)
+    // Event listener untuk tombol Edit
     document.body.addEventListener("click", function (event) {
-        if (event.target.closest(".edit-room-btn")) {
-            event.preventDefault();
+        const button = event.target.closest(".edit-room-btn");
+        if (!button) return;
 
-            let button = event.target.closest(".edit-room-btn");
+        // Ambil data dari tombol
+        document.getElementById("edit_id").value = button.dataset.id;
+        document.getElementById("edit_nama").value = button.dataset.name;
+        document.getElementById("edit_room_id").value = button.dataset.roomId;
+        document.getElementById("edit_ktp").value = button.dataset.ktp || ""; // Pastikan tidak null
+        document.getElementById("edit_alamat_asal").value = button.dataset.alamatAsal || "";
+        document.getElementById("edit_nomor_telepon").value = button.dataset.nomorTelepon || "";
+        document.getElementById("edit_status").value = button.dataset.status;
 
-            // Ambil data dari atribut tombol
-            document.getElementById("edit_id").value = button.dataset.id;
-            document.getElementById("edit_nama").value = button.dataset.name;
-            document.getElementById("edit_room_id").value = button.dataset.room_id;
-            document.getElementById("edit_ktp").value = button.dataset.ktp;
-            document.getElementById("edit_alamat_asal").value = button.dataset.alamat_asal;
-            document.getElementById("edit_nomor_telepon").value = button.dataset.nomor_telepon;
-            document.getElementById("edit_status").value = button.dataset.status;
-
-            // Tampilkan modal edit
-            document.getElementById("edit-room-modal").classList.remove("hidden");
-        }
+        // Tampilkan modal edit
+        document.getElementById("edit-room-modal").classList.remove("hidden");
     });
 
-    // Tutup Modal Edit saat tombol "X" atau "Batal" diklik
+    // Tutup Modal Edit
     document.getElementById("close-edit-modal").addEventListener("click", function () {
         document.getElementById("edit-room-modal").classList.add("hidden");
     });
+
     document.getElementById("close-edit-modal-btn").addEventListener("click", function () {
         document.getElementById("edit-room-modal").classList.add("hidden");
     });
 });
 
+
+console.log('button.dataset.roomId', button.dataset.roomId)
 
 
 </script>

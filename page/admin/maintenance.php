@@ -199,7 +199,8 @@ try {
                                           <?php 
                                           echo date_format(date_create($request['tanggal_pengajuan']), 'd M Y'); 
                                           ?>
-                                       </td>                                        <td class="px-4 py-2"><?php echo htmlspecialchars($request['deskripsi']); ?></td>
+                                       </td>                                        
+                                       <td class="px-4 py-2"><?php echo htmlspecialchars($request['deskripsi']); ?></td>
                                         <td class="px-4 py-2"><?php echo htmlspecialchars($request['kategori']); ?></td>
                                         <td class="<?php 
                                             // Tentukan teks berdasarkan status
