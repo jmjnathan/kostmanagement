@@ -93,12 +93,13 @@ try {
     <!-- Container -->
     <div class="max-w-4xl mx-auto mt-6 bg-white p-6 shadow-lg rounded-lg">
         <div class="mb-4 flex flex-col sm:flex-row justify-between items-center">
+        <h2 class="text-2xl font-bold mb-4">Pengajuan Keluar Kos</h2>
             <a href="dashboard-users.php" class="inline-flex items-center px-4 py-2 mt-2 sm:mt-0 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600">
                 <i class='bx bx-arrow-back text-xl mr-2'></i> Kembali
             </a>
         </div>
 
-        <h2 class="text-xl font-bold text-center mb-4">Pengajuan Keluar Kos</h2>
+      
 
         <?php if (!$sudahMengajukan) : ?>
             <!-- FORM PENGAJUAN KELUAR -->
